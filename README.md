@@ -13,7 +13,10 @@ Student users are evaluated by 4 categories...
 - Work Ethic
 <br><br>
 
-After every student participant has submitted their assessment for every other student in their team, they may gain access to the results of their peer-reviewed evaluation. Students may not know what individual values were given to each category; they will only have access to an average value. Instructors however will be able to see the distribution of values for every category.
+After every student participant has submitted their assessment for every other student in their team, they may gain access to the results of their peer-reviewed evaluation. Students may not know what individual values were given to each category; they will only have access to an aggregate value received for every category.
+<br><br>
+
+After every student in a given team has submitted their evaluation, the instructor will receive the calculated grade of each student and have access to a more detailed breakdown of how grades were calculated. This breakdown may then be exported to a CSV file for later use.
 
 ## Team Members <br>
   - **Charles Partous** (40175854) | Front-End
