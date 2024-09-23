@@ -18,6 +18,27 @@ After every student participant has submitted their assessment for every other s
 
 After every student in a given team has submitted their evaluation, the instructor will receive the calculated grade of each student and have access to a more detailed breakdown of how grades were calculated. This breakdown may then be exported to a CSV file for later use.
 
+## Usage
+To run locally, 
+1.
+cd into the client folder and run:
+```
+npm i
+npm run dev
+
+2.
+```
+cd into the server folder and run:
+```
+npm i
+npm start
+```
+
+3. mongodb database is required as well, host a db on your machine with port 20717
+
+
+
+
 ## Team Members <br>
   - **Charles Partous** (40175854) | Front-End
   - **Zachary Corber** (40246724) | Front-End
