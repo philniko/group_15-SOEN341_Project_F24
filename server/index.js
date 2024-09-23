@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import UserModel from "./models/User";
+import UserModel from "./models/User.js";
 
 const app = express();
 app.use(express.json());
