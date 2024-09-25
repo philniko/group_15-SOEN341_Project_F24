@@ -4,7 +4,8 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Register() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
@@ -14,7 +15,7 @@ function Register() {
   const handleSubmit = (e: any) => {
     e.preventDefault();
     axios
-      .post("http://localhost:3001/register", { name, email, password, role })
+      .post("http://localhost:3001/register", { firstName, lastName, email, password, role })
       .then((result) => {
         console.log(result);
         navigate("/login");
@@ -23,81 +24,86 @@ function Register() {
   };
 
   return (
-    <div className="d-flex justify-content-center align-items-center bg-secondary vh-100">
-      <div className="bg-white p-3 rounded w-25">
-        <h2>Register</h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
-            <label htmlFor="name">
-              <strong>Name</strong>
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter Name"
-              autoComplete="off"
-              className="form-control rounded-0"
-              onChange={(e: any) => setName(e.target.value)}
-            />
+    <div className="d-flex justify-content-center align-items-center vh-100" style={{ backgroundImage: `url(concordia_img.jpg)`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      <div id="box" className="bg-white p-4 rounded" style={{ backdropFilter: 'blur(15px)', borderRadius: '15px', boxShadow: '0 10px 30px rgba(0, 0, 0, 0.2)' }}>
+        <h2 className="text-center mb-4" style={{ fontWeight: '700', letterSpacing: '1px', color: '#333' }}>Create Your Account</h2>
+        <form onSubmit={handleSubmit} className="animate__animated animate__fadeIn">
+          <div className="row mb-3">
+            <div className="col">
+              <input
+                type="text"
+                name="firstName"
+                placeholder="First Name"
+                autoComplete="off"
+                className="form-control rounded-pill"
+                onChange={(e: any) => setFirstName(e.target.value)}
+              />
+            </div>
+            <div className="col">
+              <input
+                type="text"
+                name="lastName"
+                placeholder="Last Name"
+                autoComplete="off"
+                className="form-control rounded-pill"
+                onChange={(e: any) => setLastName(e.target.value)}
+              />
+            </div>
           </div>
-          <div className="mb-3">
-            <label htmlFor="email">
-              <strong>Email</strong>
-            </label>
+          <div className="mb-3 position-relative">
             <input
               type="email"
               name="email"
-              placeholder="Enter Email"
+              placeholder="Email"
               autoComplete="off"
-              className="form-control rounded-0"
+              className="form-control rounded-pill pl-4"
               onChange={(e: any) => setEmail(e.target.value)}
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="password">
-              <strong>Password</strong>
-            </label>
+          <div className="mb-3 position-relative">
             <input
               type="password"
               name="password"
-              placeholder="Enter Password"
-              className="form-control rounded-0"
+              placeholder="Password"
+              className="form-control rounded-pill pl-4"
               onChange={(e: any) => setPassword(e.target.value)}
             />
           </div>
-          <div className="mb-3">
-            <label htmlFor="role" className="me-2">
-              <strong>Student</strong>
-            </label>
-            <input
-              type="radio"
-              id="student"
-              name="role"
-              value="student"
-              className="form-check-input me-3"
-              onChange={(e: any) => setRole(e.target.value)}
-            />
-            <label htmlFor="role" className="me-2">
-              <strong>Instructor</strong>
-            </label>
-            <input
-              type="radio"
-              id="instructor"
-              name="role"
-              value="instructor"
-              className="form-check-input me-4"
-              onChange={(e: any) => setRole(e.target.value)}
-            />
+          <div className="mb-4 d-flex flex-column">
+            <div className="d-flex">
+              <label htmlFor="student" className="me-2" style={{ marginLeft: '11px' }}>
+                <strong>Student</strong>
+              </label>
+              <input
+                type="radio"
+                id="student"
+                name="role"
+                value="student"
+                className="form-check-input me-4 border-dark"
+                onChange={(e) => setRole(e.target.value)}
+              />
+              <label htmlFor="instructor" className="me-2">
+                <strong>Instructor</strong>
+              </label>
+              <input
+                type="radio"
+                id="instructor"
+                name="role"
+                value="instructor"
+                className="form-check-input me-4 border-dark"
+                onChange={(e) => setRole(e.target.value)}
+              />
+            </div>
           </div>
-          <button type="submit" className="btn btn-success w-100 rounded-0">
+          <button type="submit" className="btn btn-primary w-100 rounded-pill" style={{ transition: '0.3s' }}>
             Register
           </button>
         </form>
-        <br />
-        <p>Already have an account?</p>
+        <p className="text-center mt-3">Already have an account?</p>
         <Link
           to="/login"
-          className="btn btn-default border w-100 bg-light rounded-0 text-decoration-none"
+          className="btn btn-outline-secondary w-100 rounded-pill"
+          style={{ transition: '0.3s' }}
         >
           Login
         </Link>
