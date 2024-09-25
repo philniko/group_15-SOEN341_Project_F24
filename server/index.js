@@ -1,19 +1,22 @@
 import express from "express";
-import mongoose from "mongoose";
 import cors from "cors";
+import mongoose from "mongoose";
 import UserModel from "./models/User.js";
+import bcrypt from "bcryptjs"; //TODO: hash password
+import jwt from 'jsonwebtoken';
+import config from 'configs';
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 //connect mongodb
-mongoose.connect("mongodb://localhost:27017/user");
+mongoose.connect(config.mongoURL);
 
 //handling register request
 app.post("/register", (req, res) => {
-  if (!req.body.username) {
-    res.json("Please enter a username");
+  if (!req.body.email) {
+    res.json("Please enter an email");
   }
   else if (!req.body.password) {
     res.json("Please enter a password");
@@ -28,14 +31,14 @@ app.post("/register", (req, res) => {
     res.json("Please choose a role");
   }
   else { //every field is filled
-    UserModel.findOne({username: req.body.username}).then((user) => {
+    UserModel.findOne({email: req.body.email}).then((user) => {
       if (user) {
-        res.json("Username is already taken");
+        res.json("Email is already in use");
       }
       else { //every field is valid: proceeding with user creation
         req.body.teams = []
         UserModel.create(req.body)
-        .then((user) => res.json(user))
+        .then(() => res.json("success!"))
         .catch((err) => res.json(err));
       }
     });
@@ -44,7 +47,7 @@ app.post("/register", (req, res) => {
 
 //handling login request
 app.post("/login", (req, res) => {
-  UserModel.findOne({username: req.body.username}).then((user) => {
+  UserModel.findOne({email: req.body.email}).then((user) => {
     if (!user) {
       res.json("User does not exist");
     }
@@ -52,7 +55,12 @@ app.post("/login", (req, res) => {
       res.json("Password is invalid");
     }
     else {
-      res.json("Login success!")
+      const payload = {user: {email: user.email}};
+      jwt.sign(payload, config.jwtSecret, {expirsIn: 3600},
+      (err, token) => {
+        if (err) throw err;
+        res.json({token});
+      });
     }
   });
 });
