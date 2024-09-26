@@ -39,21 +39,21 @@ app.post("/register", (req, res) => {
     }).then((user) => {
       if (user) {
         return res.status(409).json("Email is already taken");
+      } else {
+        //create new user, password is hashed in UserSchema.js
+        const newUser = new UserModel({
+          firstName,
+          lastName,
+          email,
+          password,
+          role,
+          groups: [],
+        });
+
+        const savedUser = newUser.save();
+        res.status(201).json(savedUser);
       }
     });
-
-    //create new user, password is hashed in UserSchema.js
-    const newUser = new UserModel({
-      firstName,
-      lastName,
-      email,
-      password,
-      role,
-      groups: [],
-    });
-
-    const savedUser = newUser.save();
-    res.status(201).json(savedUser);
   } catch (error) {
     console.error(error);
     res.status(500).json("Server Registration Error");
