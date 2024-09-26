@@ -6,7 +6,7 @@ const UserSchema = new mongoose.Schema({
     lastName: String,
     password: String,
     role: String,
-    teams: [String]
+    teams: [String]     //array of team IDs
 });
 
 const UserModel = mongoose.model("user", UserSchema);
