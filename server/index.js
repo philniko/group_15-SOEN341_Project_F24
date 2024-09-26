@@ -73,7 +73,7 @@ app.post("/login", (req, res) => {
         user.password
       );
       if (validPassword) {
-        res.status(200).json("Login successful");
+        res.status(200).json(user);
       } else {
         res.status(401).json("Invalid password");
       }
@@ -103,14 +103,17 @@ app.post("/getGroups", (req, res) => { //request format: {id: String} (user ID)
 
 //handling group creation
 app.post("/createGroup", (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
-  if (!req.body.id) {
+
+  const {id, name} = req.body;
+
+  if (!id) {
     res.status(400).json("Missing instructor ID");
   }
-  else if (!req.body.name) {
+  else if (!name) {
     res.status(400).json("Missing group name");
   }
   else {
-    UserModel.findById(req.body.id)
+    UserModel.findById(id)
       .then((user) => {
         if (!user) {
           res.status(400).json("Instructor does not exist");
@@ -121,7 +124,7 @@ app.post("/createGroup", (req, res) => { //request format: {id: String, name: St
         else {
           //creating group
           const group = {
-            name: req.body.name,
+            name: name,
             instructor: user,
             students: []
           };
@@ -142,14 +145,17 @@ app.post("/createGroup", (req, res) => { //request format: {id: String, name: St
 
 //handling student addition
 app.post("/addStudent", (req, res) => { //request format: {groupId: String, userId: String}
-  if (!req.body.groupId) {
+
+  const {groupId, userId} = req.body;
+
+  if (!groupId) {
     res.status(400).json("Missing group id");
   }
-  else if (!req.body.userId) {
+  else if (!userId) {
     res.status(400).json("Missing student id");
   }
   else {
-    UserModel.findById(req.body.userId)
+    UserModel.findById(userId)
       .then((user) => {
         if (!user) {
           res.status(400).json("User does not exit");
@@ -158,23 +164,34 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
           res.status(400).json("User is not a student");
         }
         else {
-          GroupModel.findById(req.body.groupId)
+          GroupModel.findById(groupId)
             .then((group) => {
               if (!group) {
                 res.status(400).json("Group does not exist");
               }
-              else if (user.groups.includes(group)) {
-                res.status(400).json("User is already a member of the group");
-              }
               else {
-                //updating student groups and group students arrays
-                user.groups.push(group);
-                group.students.push(user);
+                let valid = true;
+                
+                for (let i = 0; i < user.groups.length; i++) {
+                  if (user.groups[i]._id.equals(group._id)) {
+                    valid = false;
+                    break;
+                  }
+                }
 
-                user.save();
-                group.save();
+                if (!valid) {
+                  res.status(400).json("User is already a member of the group");
+                }
+                else {
+                  //updating student groups and group students arrays
+                  user.groups.push(group);
+                  group.students.push(user);
 
-                res.status(200).json(group);
+                  user.save();
+                  group.save();
+
+                  res.status(200).json(group);
+                }
               }
             })
             .catch((err) => res.status(500).json(err));
