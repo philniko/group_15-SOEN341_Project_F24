@@ -12,43 +12,37 @@ app.use(cors());
 mongoose.connect("mongodb://localhost:27017/user");
 
 //handling register request
-app.post("/register", (req, res) => {
-  if (!req.body.email) {
-    res.status(400).json("Please enter an email");
-  } else if (!req.body.firstName) {
-    res.status(400).json("Please enter a first name");
-  } else if (!req.body.lastName) {
-    res.status(400).json("Please enter a last name");
-  } else if (!req.body.password) {
-    res.status(400).json("Please enter a password");
-  } else if (!req.body.role) {
-    res.status(400).json("Please choose a role");
-  } else {
-    //every field is filled
-    UserModel.findOne({ email: req.body.email }).then((user) => {
-      if (user) {
-        return res
-          .status(409)
-          .json("An account already exists with this email");
-      } else {
-        //every field is valid: proceeding with user creation
-        const salt = bcrypt.genSaltSync(10);
-        const hash = bcrypt.hashSync(req.body.password, salt);
-        req.body.password = hash;
-        req.body.teams = [];
-        UserModel.create(req.body)
-          .then((user) => res.status(201).json(user))
-          .catch((err) =>
-            res.status(500).json("An error occurred during registration")
-          );
-      }
-    });
-  }
-});
+app.post("/register", (req,res) =>{
+  const {firstName, lastName, email, password, role} = req.body;
 
-//handling login request
+  //making sure all fields are filled
+  if (!firstName){return res.status(400).json("Please enter a first name")};
+  if (!lastName){return res.status(400).json("Please enter a last name")};
+  if (!email){return res.status(400).json("Please enter an email")};
+  if (!password){return res.status(400).json("Please enter a password")};
+  if (!role){return res.status(400).json("Please chose a role")};
+  
+  //checking to see if the user already exists
+  try{
+    const existingUser =  UserModel.findOne({email});
+    if (existingUser){
+      return res.status(409).json("Email is already taken")
+    }
+    
+    //create new user, password is hashed in UserSchema.js
+    const newUser = new UserModel({firstName, lastName, email, password, role, groups:[]});
+
+    const savedUser =  newUser.save();
+    res.status(201).json(savedUser);
+  }catch(error){
+    console.error(error);
+    res.status(500).json("Server Registration Error");
+  }
+})
+
+// //handling login request
 app.post("/login", (req, res) => {
-  UserModel.findOne({ email: req.body.email}).then((user) => {
+  UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
       res.status(404).json("User does not exist");
     } else {
@@ -67,4 +61,4 @@ app.post("/login", (req, res) => {
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
-});
+})
