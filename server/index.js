@@ -2,7 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
-import TeamModel from "./models/Team.js";
+import GroupModel from "./models/Group.js";
 import bcrypt from "bcrypt";
 
 const app = express();
@@ -10,8 +10,8 @@ app.use(express.json());
 app.use(cors());
 
 //connect mongodb
-mongoose.connect("mongodb://localhost:27017/user");
-mongoose.createConnection("mongodb://localhost:27017/team");
+mongoose.connect("mongodb://localhost:27017/User");
+mongoose.createConnection("mongodb://localhost:27017/Group");
 
 //handling register request
 app.post("/register", (req, res) => {
@@ -37,7 +37,7 @@ app.post("/register", (req, res) => {
   //checking to see if the user already exists
   try {
     const existingUser = UserModel.findOne({
-      email: email,
+      email: email
     }).then((user) => {
       if (user) {
         return res.status(409).json("Email is already taken");
@@ -81,48 +81,33 @@ app.post("/login", (req, res) => {
   });
 });
 
-//handling getTeams request
-app.post("/getTeams", (req, res) => { //request format: {id: String} (user ID)
+//handling getGroups request
+app.post("/getGroups", (req, res) => { //request format: {id: String} (user ID)
   if (!req.body.id) {
     res.status(400).json("Missing user ID");
   }
   else {
     UserModel.findById(req.body.id)
+      .populate("groups")
       .then((user) => {
         if (!user) {
           res.status(400).json("User not found");
         }
         else {
-          //converting each team ID into an object containing the team's info
-          const promises = user.teams.map((id) => 
-            TeamModel.findById(id)
-              .then((team) => {
-                if (!team) {
-                  throw new Error("Database corrupted");
-                }
-                else {
-                  return team;
-                }
-              })
-          );
-
-          //wait for the promises to resolve and then return the list of teams
-          Promise.all(promises)
-            .then((teams) => res.status(200).json({teams: teams}))
-            .catch((err) => res.status(500).json(err));
+          res.status(200).json({groups: user.groups})
         }
       })
       .catch((err) => res.status(500).json(err));
   }
 });
 
-//handling team creation
-app.post("/createTeam", (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
+//handling group creation
+app.post("/createGroup", (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
   if (!req.body.id) {
     res.status(400).json("Missing instructor ID");
   }
   else if (!req.body.name) {
-    res.status(400).json("Missing team name");
+    res.status(400).json("Missing group name");
   }
   else {
     UserModel.findById(req.body.id)
@@ -131,26 +116,22 @@ app.post("/createTeam", (req, res) => { //request format: {id: String, name: Str
           res.status(400).json("Instructor does not exist");
         }
         else if (user.role != "instructor") {
-          res.status(400).json("user is not an instructor");
+          res.status(400).json("User is not an instructor");
         }
         else {
-          //creating team
-          const team = {
+          //creating group
+          const group = {
             name: req.body.name,
-            instructor: {
-              _id: user._id,
-              firstName: user.firstName,
-              lastName: user.lastName
-            },
+            instructor: user,
             students: []
           };
 
-          TeamModel.create(team)
-            .then((team) => {
-              //updating instructor's teams array
-              user.teams.push(team._id);
+          GroupModel.create(group)
+            .then((group) => {
+              //updating instructor's groups array
+              user.groups.push(group);
               user.save();
-              res.status(200).json(team);
+              res.status(200).json(group);
             })
             .catch((err) => res.status(500).json(err));
         }
@@ -160,9 +141,9 @@ app.post("/createTeam", (req, res) => { //request format: {id: String, name: Str
 });
 
 //handling student addition
-app.post("/addStudent", (req, res) => { //request format: {teamId: String, userId: String}
-  if (!req.body.teamId) {
-    res.status(400).json("Missing team id");
+app.post("/addStudent", (req, res) => { //request format: {groupId: String, userId: String}
+  if (!req.body.groupId) {
+    res.status(400).json("Missing group id");
   }
   else if (!req.body.userId) {
     res.status(400).json("Missing student id");
@@ -176,28 +157,24 @@ app.post("/addStudent", (req, res) => { //request format: {teamId: String, userI
         else if (user.role != "student") {
           res.status(400).json("User is not a student");
         }
-        else if (user.teams.includes(req.body.teamId)) {
-          res.status(400).json("User is already a member of the team");
-        }
         else {
-          TeamModel.findById(req.body.teamId)
-            .then((team) => {
-              if (!team) {
-                res.status(400).json("Team does not exist");
+          GroupModel.findById(req.body.groupId)
+            .then((group) => {
+              if (!group) {
+                res.status(400).json("Group does not exist");
+              }
+              else if (user.groups.includes(group)) {
+                res.status(400).json("User is already a member of the group");
               }
               else {
-                //updating student teams and team students arrays
-                user.teams.push(team._id);
-                team.students.push({
-                  _id: user._id,
-                  firstName: user.firstName,
-                  lastName: user.lastName
-                });
+                //updating student groups and group students arrays
+                user.groups.push(group);
+                group.students.push(user);
 
                 user.save();
-                team.save();
+                group.save();
 
-                res.status(200).json(team);
+                res.status(200).json(group);
               }
             })
             .catch((err) => res.status(500).json(err));
