@@ -65,24 +65,23 @@ app.post("/getTeams", (req, res) => { //request format: {id: String} (user ID)
           res.status(400).json("User not found");
         }
         else {
-          const output = Array(user.teams.length);
-
           //converting each team ID into an object containing the team's info
-          for (let i = 0; i < user.teams.length; i++) {
-            TeamModel.findById(user.teams[i])
+          const promises = user.teams.map((id) => 
+            TeamModel.findById(id)
               .then((team) => {
                 if (!team) {
-                  res.status(500).json("Database corrupted");
+                  throw new Error("Database corrupted");
                 }
                 else {
-                  output[i] = team;
+                  return team;
                 }
               })
-              .catch((err) => res.status(500).json(err));
-          }
+          );
 
-          //return the list of teams
-          res.status(200).json({teams: output});
+          //wait for the promises to resolve and then return the list of teams
+          Promise.all(promises)
+            .then((teams) => res.status(200).json({teams: teams}))
+            .catch((err) => res.status(500).json(err));
         }
       })
       .catch((err) => res.status(500).json(err));
