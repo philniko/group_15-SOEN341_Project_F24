@@ -107,10 +107,19 @@ app.post("/createTeam", (req, res) => { //request format: {id: String, name: Str
         }
         else {
           //creating team
-          req.body.students = [];
-          TeamModel.create(req.body)
+          const team = {
+            name: req.body.name,
+            instructor: {
+              _id: user._id,
+              firstName: user.firstName,
+              lastName: user.lastName
+            },
+            students: []
+          };
+
+          TeamModel.create(team)
             .then((team) => {
-              //updating instructor teams array
+              //updating instructor's teams array
               user.teams.push(team._id);
               user.save();
               res.status(200).json(team);
@@ -151,9 +160,15 @@ app.post("/addStudent", (req, res) => { //request format: {teamId: String, userI
               else {
                 //updating student teams and team students arrays
                 user.teams.push(team._id);
-                team.students.push(user._id);
+                team.students.push({
+                  _id: user._id,
+                  firstName: user.firstName,
+                  lastName: user.lastName
+                });
+
                 user.save();
                 team.save();
+
                 res.status(200).json(team);
               }
             })
