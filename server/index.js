@@ -10,8 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 //connect mongodb
-mongoose.connect("mongodb://localhost:27017/User");
-mongoose.createConnection("mongodb://localhost:27017/Group");
+mongoose.connect("mongodb://localhost:27017/appDB");
 
 //handling register request
 app.post("/register", (req, res) => {
