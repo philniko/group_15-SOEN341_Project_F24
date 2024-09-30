@@ -1,0 +1,11 @@
+Meeting Minutes #3
+Date: September 24th 2024
+Time: 1:00-1:25
+Present: Carlo Ramadori, Zachary Corber, Omar Chabti, Kevin Liu, Charles, Philip Nikolov
+Sprint: Sprint 1
+Goals:
+1. See where everybody is at on the Frontend and Backend
+Summary:
+Front end register page was finished and pushed to the main, which was done by Charles. So far, backend takes login and register to the database. For the teams, a different connection for the teams in the same database. Carlo will do the student dashboard, and Zach will do the CSS styling. Meeting was cut short due to fire alarm in the library.
+Next Meeting Plans:
+1. Update what issues were completed and if any new issues need to be added
