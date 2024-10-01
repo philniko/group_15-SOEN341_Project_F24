@@ -2,61 +2,83 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
+import bcrypt from "bcrypt";
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
 //connect mongodb
-mongoose.connect("mongodb://localhost:27017/user");
+mongoose.connect("mongodb://localhost:27017/appDB");
 
 //handling register request
 app.post("/register", (req, res) => {
-  if (!req.body.username) {
-    res.json("Please enter a username");
+  const { firstName, lastName, email, password, role } = req.body;
+
+  //making sure all fields are filled
+  if (!firstName) {
+    return res.status(400).json("Please enter a first name");
   }
-  else if (!req.body.password) {
-    res.json("Please enter a password");
+  if (!lastName) {
+    return res.status(400).json("Please enter a last name");
   }
-  else if (!req.body.firstName) {
-    res.json("Please enter a first name");
+  if (!email) {
+    return res.status(400).json("Please enter an email");
   }
-  else if (!req.body.lastName) {
-    res.json("Please enter a last name");
+  if (!password) {
+    return res.status(400).json("Please enter a password");
   }
-  else if (!req.body.role) {
-    res.json("Please choose a role");
+  if (!role) {
+    return res.status(400).json("Please chose a role");
   }
-  else { //every field is filled
-    UserModel.findOne({username: req.body.username}).then((user) => {
+
+  //checking to see if the user already exists
+  try {
+    const existingUser = UserModel.findOne({
+      email: email,
+    }).then((user) => {
       if (user) {
-        res.json("Username is already taken");
-      }
-      else { //every field is valid: proceeding with user creation
-        req.body.teams = []
-        UserModel.create(req.body)
-        .then((user) => res.json(user))
-        .catch((err) => res.json(err));
+        return res.status(409).json("Email is already taken");
+      } else {
+        //create new user, password is hashed in UserSchema.js
+        const newUser = new UserModel({
+          firstName,
+          lastName,
+          email,
+          password,
+          role,
+          groups: [],
+        });
+
+        const savedUser = newUser.save();
+        res.status(201).json(savedUser);
       }
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json("Server Registration Error");
   }
 });
 
-//handling login request
+// //handling login request
 app.post("/login", (req, res) => {
-  UserModel.findOne({username: req.body.username}).then((user) => {
+  UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
-      res.json("User does not exist");
-    }
-    else if (req.body.password != user.password) {
-      res.json("Password is invalid");
-    }
-    else {
-      res.json("Login success!")
+      res.status(404).json("User does not exist");
+    } else {
+      const validPassword = bcrypt.compareSync(
+        req.body.password,
+        user.password
+      );
+      if (validPassword) {
+        res.status(200).json("Login successful");
+      } else {
+        res.status(401).json("Invalid password");
+      }
     }
   });
 });
 
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
-})
+});
