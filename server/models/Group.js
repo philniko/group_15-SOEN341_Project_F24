@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 
 const GroupSchema = new mongoose.Schema({
 
-    groupName: {
+    name: {
         type: String,
         required: true
     },
 
-    teacherId: {
+    instructor: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
         required: true
