@@ -8,6 +8,12 @@ import Home from './StudentDashboard/Home.tsx'
 import MyGroup from './StudentDashboard/MyGroup.tsx'
 import UserSettings from './StudentDashboard/UserSettings.tsx'
 
+import SidebarInstructor from './InstructorDashboard/Sidebar.tsx'
+import HomeInstructor from './InstructorDashboard/Home.tsx'
+import MyGroupInstructor from './InstructorDashboard/MyGroup.tsx'
+import UserSettingsInstructor from './InstructorDashboard/UserSettings.tsx'
+import './InstructorDashboard/InstructorDashboard.css'
+
 
 function App() {
 
@@ -16,8 +22,19 @@ function App() {
         <Sidebar />
         <Routes>
           <Route path="/Home" element={<Home />} />
-          <Route path="/mygroup" element={<MyGroup />} />
-          <Route path="/usersettings" element={<UserSettings />} />
+          <Route path="/MyGroup" element={<MyGroup />} />
+          <Route path="/userSettings" element={<UserSettings />} />
+        </Routes>
+      </>
+  );
+
+  const InstructorDashboard = () => (
+    <>
+        <SidebarInstructor />
+        <Routes>
+          <Route path="/Home" element={<HomeInstructor />} />
+          <Route path="/MyGroup" element={<MyGroupInstructor />} />
+          <Route path="/UserSettings" element={<UserSettingsInstructor />} />
         </Routes>
       </>
   );
@@ -30,6 +47,7 @@ function App() {
 
           {/* Routes with Sidebar */}
           <Route path="/*" element={<LayoutWithSidebar />} />
+          <Route path="/instructor/*" element={<InstructorDashboard />} />
         </Routes>
       </BrowserRouter>
   );
