@@ -4,6 +4,25 @@ import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
+
+const JWT_SECRET = "secret";
+// server/index.js
+
+// Middleware to verify JWT
+const verifyJWT = (req, res, next) => {
+  const token = req.headers["x-access-token"];
+  if (!token) {
+    return res.status(403).json("A token is required for authentication");
+  }
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(401).json("Invalid token");
+  }
+};
 
 const app = express();
 app.use(express.json());
@@ -61,7 +80,7 @@ app.post("/register", (req, res) => {
   }
 });
 
-// //handling login request
+//handling login request
 app.post("/login", (req, res) => {
   UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
@@ -72,7 +91,11 @@ app.post("/login", (req, res) => {
         user.password
       );
       if (validPassword) {
-        res.status(200).json(user);
+        //generate token
+        const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+          expiresIn: "1h",
+        });
+        res.status(200).json({ token: token });
       } else {
         res.status(401).json("Invalid password");
       }
@@ -81,71 +104,63 @@ app.post("/login", (req, res) => {
 });
 
 //handling getGroups request
-app.post("/getGroups", (req, res) => { //request format: {id: String} (user ID)
-  if (!req.body.id) {
-    res.status(400).json("Missing user ID");
-  }
-  else {
-    UserModel.findById(req.body.id)
-      .populate("groups")
-      .then((user) => {
-        if (!user) {
-          res.status(400).json("User not found");
-        }
-        else {
-          res.status(200).json({groups: user.groups})
-        }
-      })
-      .catch((err) => res.status(500).json(err));
-  }
+app.post("/getGroups", verifyJWT, (req, res) => {
+  const userId = req.user.id; // Extract user ID from JWT
+
+  UserModel.findById(userId)
+    .populate({
+      path: 'groups',
+      populate: {
+        path: 'instructor', // Populate the instructor details within the group
+        select: 'firstName lastName'  // Select the necessary fields from the instructor
+      }
+    })
+    .then((user) => {
+      if (!user) {
+        return res.status(400).json("User not found");
+      }
+      return res.status(200).json({ groups: user.groups });
+    })
+    .catch((err) => res.status(500).json(err));
 });
 
 //handling group creation
-app.post("/createGroup", (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
+app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
+  const userId = req.user.id; // Extract user ID from JWT
+  const name = req.body.name;
+  UserModel.findById(userId)
+    .then((user) => {
+      if (!user) {
+        res.status(400).json("Instructor does not exist");
+      }
+      else if (user.role != "instructor") {
+        res.status(400).json("User is not an instructor");
+      }
+      else {
+        //creating group
+        const group = {
+          name: name,
+          instructor: user,
+          students: []
+        };
 
-  const {id, name} = req.body;
-
-  if (!id) {
-    res.status(400).json("Missing instructor ID");
-  }
-  else if (!name) {
-    res.status(400).json("Missing group name");
-  }
-  else {
-    UserModel.findById(id)
-      .then((user) => {
-        if (!user) {
-          res.status(400).json("Instructor does not exist");
-        }
-        else if (user.role != "instructor") {
-          res.status(400).json("User is not an instructor");
-        }
-        else {
-          //creating group
-          const group = {
-            name: name,
-            instructor: user,
-            students: []
-          };
-
-          GroupModel.create(group)
-            .then((group) => {
-              //updating instructor's groups array
-              user.groups.push(group);
-              user.save();
-              res.status(200).json(group);
-            })
-            .catch((err) => res.status(500).json(err));
-        }
-      })
-      .catch((err) => res.status(500).json(err));
-  }
+        GroupModel.create(group)
+          .then((group) => {
+            //updating instructor's groups array
+            user.groups.push(group);
+            user.save();
+            res.status(200).json(group);
+          })
+          .catch((err) => res.status(500).json(err));
+      }
+    })
+    .catch((err) => res.status(500).json(err));
 });
 
 //handling student addition
 app.post("/addStudent", (req, res) => { //request format: {groupId: String, userId: String}
 
-  const {groupId, userId} = req.body;
+  const { groupId, userId } = req.body;
 
   if (!groupId) {
     res.status(400).json("Missing group id");
@@ -170,7 +185,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
               }
               else {
                 let valid = true;
-                
+
                 for (let i = 0; i < user.groups.length; i++) {
                   if (user.groups[i]._id.equals(group._id)) {
                     valid = false;
