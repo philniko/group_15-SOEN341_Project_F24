@@ -2,39 +2,32 @@ import 'bootstrap/dist/css/bootstrap.min.css'
 import Register from './Register'
 import Login from './Login'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Sidebar from './StudentDashboard/Sidebar.tsx'
-import './StudentDashboard/StudentDashboard.css'
-import Home from './StudentDashboard/Home.tsx'
-import MyGroup from './StudentDashboard/MyGroup.tsx'
-import UserSettings from './StudentDashboard/UserSettings.tsx'
 
-import SidebarInstructor from './InstructorDashboard/Sidebar.tsx'
+import HomeStudent from './StudentDashboard/Home.tsx'
+import NavbarStudent from './StudentDashboard/Navbar.tsx'
+import './StudentDashboard/StudentDashboard.css'
+
 import HomeInstructor from './InstructorDashboard/Home.tsx'
-import MyGroupInstructor from './InstructorDashboard/MyGroup.tsx'
-import UserSettingsInstructor from './InstructorDashboard/UserSettings.tsx'
+import NavbarInstructor from './InstructorDashboard/Navbar.tsx'
 import './InstructorDashboard/InstructorDashboard.css'
 
 
 function App() {
 
-  const LayoutWithSidebar = () => (
+  const StudentDashboard = () => (
       <>
-        <Sidebar />
+        <NavbarStudent />
         <Routes>
-          <Route path="/Home" element={<Home />} />
-          <Route path="/MyGroup" element={<MyGroup />} />
-          <Route path="/userSettings" element={<UserSettings />} />
+          <Route path="/Home" element={<HomeStudent />} />
         </Routes>
       </>
   );
 
   const InstructorDashboard = () => (
     <>
-        <SidebarInstructor />
+        <NavbarInstructor />
         <Routes>
           <Route path="/Home" element={<HomeInstructor />} />
-          <Route path="/MyGroup" element={<MyGroupInstructor />} />
-          <Route path="/UserSettings" element={<UserSettingsInstructor />} />
         </Routes>
       </>
   );
@@ -47,7 +40,7 @@ function App() {
           <Route path="/register" element={<Register />} />
 
           {/* Routes with Sidebar */}
-          <Route path="/*" element={<LayoutWithSidebar />} />
+          <Route path="/student/*" element={<StudentDashboard />} />
           <Route path="/instructor/*" element={<InstructorDashboard />} />
         </Routes>
       </BrowserRouter>
