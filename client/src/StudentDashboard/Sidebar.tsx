@@ -1,19 +1,25 @@
-import {useState} from 'react';
+import { useState } from 'react';
 import * as FaIcons from 'react-icons/fa';
 import * as AiIcons from 'react-icons/ai';
-import {Link} from 'react-router-dom';
-import {SidebarData} from './SidebarData.tsx';
-import {SidebarItem} from './SidebarData.tsx';
-import {IconContext} from 'react-icons';
+import { Link, useNavigate } from 'react-router-dom';
+import { SidebarData } from './SidebarData.tsx';
+import { SidebarItem } from './SidebarData.tsx';
+import { IconContext } from 'react-icons';
 
 
-function Sidebar(){
+function Sidebar() {
     const [sidebar, setSidebar] = useState(false);
-
     const showSidebar = () => setSidebar(!sidebar);
-    return(
+
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        localStorage.removeItem('token');
+        navigate('/login');
+    }
+    return (
         <>
-            <IconContext.Provider value={{color: '#fff'}}>
+            <IconContext.Provider value={{ color: '#fff' }}>
                 <div className='navbar'>
                     <Link to='#' className='menu-bars'>
                         <FaIcons.FaBars onClick={showSidebar} />
@@ -26,7 +32,7 @@ function Sidebar(){
                                 <AiIcons.AiOutlineClose onClick={showSidebar} />
                             </Link>
                         </li>
-                        {SidebarData.map((item : SidebarItem, index : number) => {
+                        {SidebarData.map((item: SidebarItem, index: number) => {
                             return (
                                 <li key={index} className={item.cName}>
                                     <Link to={item.path}>
@@ -36,6 +42,13 @@ function Sidebar(){
                                 </li>
                             );
                         })}
+                        <li className='nav-text'>
+                            <Link to={'/Login'} onClick={handleLogout}>
+                                <AiIcons.AiOutlineLogout />
+                                <span>Logout</span>
+                            </Link>
+                        </li>
+
                     </ul>
                 </nav>
             </IconContext.Provider>

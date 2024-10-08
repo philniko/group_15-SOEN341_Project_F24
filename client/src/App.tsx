@@ -1,12 +1,13 @@
 import 'bootstrap/dist/css/bootstrap.min.css'
 import Register from './Register'
 import Login from './Login'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from 'react-router-dom'
 import Sidebar from './StudentDashboard/Sidebar.tsx'
 import './StudentDashboard/StudentDashboard.css'
 import Home from './StudentDashboard/Home.tsx'
 import MyGroup from './StudentDashboard/MyGroup.tsx'
 import UserSettings from './StudentDashboard/UserSettings.tsx'
+import { Component } from 'react'
 
 import SidebarInstructor from './InstructorDashboard/Sidebar.tsx'
 import HomeInstructor from './InstructorDashboard/Home.tsx'
@@ -14,6 +15,10 @@ import MyGroupInstructor from './InstructorDashboard/MyGroup.tsx'
 import UserSettingsInstructor from './InstructorDashboard/UserSettings.tsx'
 import './InstructorDashboard/InstructorDashboard.css'
 
+const ProtectedRoute = ({ element: Component, ...rest }: any) => {
+  const token = localStorage.getItem('token');
+  return token ? <Component {...rest} /> : <Navigate to="/login" />; // Redirect to login page if token is null
+}
 
 function App() {
 
@@ -40,15 +45,15 @@ function App() {
   );
 
   return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/" element={<Register />} />
-          <Route path="/register" element={<Register />} />
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Register />} />
+        <Route path="/register" element={<Register />} />
 
           {/* Routes with Sidebar */}
-          <Route path="/*" element={<LayoutWithSidebar />} />
-          <Route path="/instructor/*" element={<InstructorDashboard />} />
+          <Route path="/*" element={<ProtectedRoute element={LayoutWithSidebar}/>} />
+          <Route path="/instructor/*" element={<ProtectedRoute element={InstructorDashboard}/>} />
         </Routes>
       </BrowserRouter>
   );
