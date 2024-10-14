@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom';
 function Home(){
     const navigate = useNavigate();
     const [groupName, setGroupName] = useState("");
-    const [groups, setGroups] = useState<{_id: string, name: string, students: []}[]>([]);
+    const [groups, setGroups] = useState<{_id: String, name: String, students: []}[]>([]);
 
     const createGroup = async () => {
         const token = localStorage.getItem('token') || "";
@@ -58,7 +58,7 @@ function Home(){
     
                 <div className='row'>
                     {groups.map((group) => 
-                        <div key={group._id} className="col-12 mb-3">
+                        <div key={String(group._id)} className="col-12 mb-3">
                             <div className="card" onClick={() => navigate("/instructor/group/" + group._id)}>
                                 <div className="card-body">
                                     <h5 className="card-title">{group.name}</h5>

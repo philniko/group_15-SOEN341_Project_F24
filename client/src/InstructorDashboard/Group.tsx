@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 function Group() {
     let { id } = useParams();
     const [studentEmail, setStudentEmail] = useState("");
-    const [students, setStudents] = useState<{_id: string, name: String}[]>([]);
+    const [students, setStudents] = useState<{_id: String, firstName: String, lastName: String}[]>([]);
 
     let updateStudents = async () => {
         const token = localStorage.getItem('token') || "";
@@ -19,7 +19,7 @@ function Group() {
 
         if (response.ok) {
             let data = await response.json();
-            setStudents(data.students || []);
+            setStudents(data.group.students || []);
         }
     }
     
@@ -59,10 +59,10 @@ function Group() {
     
                 <div className='row'>
                     {students.map((student) => 
-                        <div key={student._id} className="col-12 mb-3">
+                        <div key={String(student._id)} className="col-12 mb-3">
                             <div className="card">
                                 <div className="card-body">
-                                    <h5 className="card-title">{student.name}</h5>
+                                    <h5 className="card-title">{student.firstName + " " + student.lastName}</h5>
                                     <p className="card-text">
                                         Overall Grade: {"TODO" /*TODO*/}
                                     </p>
