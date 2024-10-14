@@ -95,7 +95,7 @@ app.post("/login", (req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
           expiresIn: "1h",
         });
-        res.status(200).json({ token: token });
+        res.status(200).json({ role: user.role, token: token });
       } else {
         res.status(401).json("Invalid password");
       }
