@@ -177,7 +177,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
     res.status(400).json("Missing student email");
   }
   else {
-    UserModel.find({email: userEmail})
+    UserModel.findOne({email: userEmail})
       .then((user) => {
         if (!user) {
           res.status(400).json("User does not exit");
