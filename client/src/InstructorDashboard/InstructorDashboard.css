@@ -88,10 +88,14 @@ span {
     font-family: 'Lato', sans-serif;
 }
 
-.home,.MyGroup,.UserSettings{
-    display: flex;
-    height: 90vh;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
+.home {
+    position: relative;
+    top: 100px;
+    height: auto;
+    font-size: medium;
+}
+
+.card:hover {
+    background-color: aliceblue;
+    cursor: pointer;
 }
