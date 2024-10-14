@@ -28,7 +28,12 @@ function Login() {
                 // Store the JWT token in local storage
                 localStorage.setItem('token', data.token);
                 console.log('login data: ', data);
-                navigate('/home'); // Redirect to dashboard/home page
+                if (data.token.role == "instructor") { // Redirect to dashboard/home page
+                    navigate('/instructor/home');
+                }
+                else {
+                    navigate('/student/home');
+                }
             } else {
                 setError(data);
             }
