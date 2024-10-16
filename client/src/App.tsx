@@ -8,6 +8,7 @@ import NavbarStudent from './StudentDashboard/Navbar.tsx'
 import './StudentDashboard/StudentDashboard.css'
 
 import HomeInstructor from './InstructorDashboard/Home.tsx'
+import Group from "./InstructorDashboard/Group.tsx"
 import NavbarInstructor from './InstructorDashboard/Navbar.tsx'
 import './InstructorDashboard/InstructorDashboard.css'
 
@@ -18,7 +19,7 @@ function App() {
       <>
         <NavbarStudent />
         <Routes>
-          <Route path="/Home" element={<HomeStudent />} />
+          <Route path="/home" element={<HomeStudent />} />
         </Routes>
       </>
   );
@@ -27,7 +28,8 @@ function App() {
     <>
         <NavbarInstructor />
         <Routes>
-          <Route path="/Home" element={<HomeInstructor />} />
+          <Route path="/home" element={<HomeInstructor />} />
+          <Route path="group/:id" element={<Group />}></Route>
         </Routes>
       </>
   );

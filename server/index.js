@@ -95,7 +95,7 @@ app.post("/login", (req, res) => {
         const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
           expiresIn: "1h",
         });
-        res.status(200).json({ token: token });
+        res.status(200).json({ role: user.role, token: token });
       } else {
         res.status(401).json("Invalid password");
       }
@@ -122,6 +122,14 @@ app.post("/getGroups", verifyJWT, (req, res) => {
       return res.status(200).json({ groups: user.groups });
     })
     .catch((err) => res.status(500).json(err));
+});
+
+app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
+  let { id } = req.body;
+  GroupModel.findById(id)
+  .populate({path: "students"})
+  .then((group) => res.status(200).json({group: group}))
+  .catch((err)  => res.status(500).json(err));
 });
 
 //handling group creation
@@ -158,18 +166,18 @@ app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: Strin
 });
 
 //handling student addition
-app.post("/addStudent", (req, res) => { //request format: {groupId: String, userId: String}
+app.post("/addStudent", (req, res) => { //request format: {groupId: String, userEmail: String}
 
-  const { groupId, userId } = req.body;
+  const { groupId, userEmail } = req.body;
 
   if (!groupId) {
     res.status(400).json("Missing group id");
   }
-  else if (!userId) {
-    res.status(400).json("Missing student id");
+  else if (!userEmail) {
+    res.status(400).json("Missing student email");
   }
   else {
-    UserModel.findById(userId)
+    UserModel.findOne({email: userEmail})
       .then((user) => {
         if (!user) {
           res.status(400).json("User does not exit");
