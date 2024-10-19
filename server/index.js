@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
+import RatingModel from "./models/Ratings.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -68,6 +69,7 @@ app.post("/register", (req, res) => {
           password,
           role,
           groups: [],
+          ratings: [],
         });
 
         const savedUser = newUser.save();

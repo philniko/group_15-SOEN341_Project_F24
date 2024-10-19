@@ -33,8 +33,12 @@ const UserSchema = new mongoose.Schema({
     groups: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Group'
-    }]
+    }],
 
+    ratings: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ratings'
+    }]
 
     })
 
