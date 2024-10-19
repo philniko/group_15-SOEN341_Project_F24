@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 function Group() {
     let { id } = useParams();
     const [studentEmail, setStudentEmail] = useState("");
-    const [students, setStudents] = useState<{_id: String, firstName: String, lastName: String}[]>([]);
+    const [students, setStudents] = useState<{_id: string, firstName: string, lastName: string}[]>([]);
 
     let updateStudents = async () => {
         const token = localStorage.getItem('token') || "";
