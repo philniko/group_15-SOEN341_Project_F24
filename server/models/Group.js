@@ -16,6 +16,11 @@ const GroupSchema = new mongoose.Schema({
     students: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
+    }],
+
+    ratings: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Ratings'
     }]
 
 })

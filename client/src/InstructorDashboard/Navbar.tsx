@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '../hooks/UseUser'; //hook to get info about current user
 import './InstructorDashboard.css';  
 import './Navbar.css';
