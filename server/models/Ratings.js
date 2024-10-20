@@ -16,7 +16,7 @@ const RatingSchema = new mongoose.Schema({
 
     CooperationRating: {
         type: Number,
-        enum: [1,2,3,4],
+        enum: [1,2,3,4,5],
         required: true
     },
 
@@ -26,7 +26,7 @@ const RatingSchema = new mongoose.Schema({
 
     ConceptualContributionRating:{
         type: Number,
-        enum: [1,2,3,4],
+        enum: [1,2,3,4,5],
         required: true
     },
 
@@ -36,7 +36,7 @@ const RatingSchema = new mongoose.Schema({
 
     PracticalContributionRating:{
         type: Number,
-        enum: [1,2,3,4],
+        enum: [1,2,3,4,5],
         required: true
     },
 
@@ -46,7 +46,7 @@ const RatingSchema = new mongoose.Schema({
 
     WorkEthicRating:{
         type: Number,
-        enum: [1,2,3,4],
+        enum: [1,2,3,4,5],
         required: true
     },
 

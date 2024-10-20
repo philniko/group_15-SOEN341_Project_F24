@@ -1,11 +1,20 @@
-import {useEffect, useState} from 'react'
+import { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import axios from 'axios';
 
-function Home(){
-    const [students, setStudents] = useState([]); // To store group members
-    const [selectedStudent, setSelectedStudent] = useState(null); // To store the selected student for rating
-    const [showModal, setShowModal] = useState(false); // To control pop-up visibility
+// Define a Student interface
+interface Student {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    rated?: boolean; // Optional property to track if rated
+}
+
+function Home() {
+    const [students, setStudents] = useState<Student[]>([]);
+    const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+    const [showModal, setShowModal] = useState(false);
     const [ratings, setRatings] = useState({
         Cooperation: 0,
         ConceptualContribution: 0,
@@ -19,63 +28,70 @@ function Home(){
         WorkEthicFeedback: ""
     });
 
+    // Replace with the group fetching logic
     useEffect(() => {
-        // Fetch group and student info
-        async function fetchStudents() {
+        const fetchGroupData = async () => {
             const token = localStorage.getItem('token') || '';
-            const response = await axios.post('http://localhost:3001/getGroup', {
-                headers: {
-                    'x-access-token': token,
-                }
-            });
-            setStudents(response.data.students);
-        }
 
-        fetchStudents();
+            try {
+                const response = await axios.post('http://localhost:3001/getStudentGroup', {}, {
+                    headers: {
+                        'x-access-token': token,
+                    },
+                });
+
+                // Assuming the response contains students in data.students
+                setStudents(response.data.students);
+                console.log(response.data.students);
+            } catch (error) {
+                console.error('Error fetching group data:', error.response ? error.response.data : error.message);
+            }
+        };
+
+        fetchGroupData();
     }, []);
 
-    // Function to handle "Not Rated Yet" or "Change Rating" click
-    const handleRateStudent = (student) => {
+    const handleRateStudent = (student: Student) => {
         setSelectedStudent(student);
         setShowModal(true);
-
-        // If it's "Change Rating," fetch previous rating and fill the form
-        if (student.rated) {
-            // Fetch and populate ratings (API call)
-        }
     };
 
-    const handleRatingChange = (attribute, value) => {
+    const handleRatingChange = (attribute: string, value: number) => {
         setRatings({ ...ratings, [attribute]: value });
     };
 
     const handleSubmitRating = async () => {
-        const token = localStorage.getItem('token') || '';
-        const ratingData = {
-            raterEmail: "your-email@example.com", // Replace with logged-in user's email
-            studentId: selectedStudent._id,
-            ...ratings,
-            ...feedback
-        };
+        if (selectedStudent) {
+            const token = localStorage.getItem('token') || '';
+            const ratingData = {
+                rateeId: selectedStudent._id,
+                ...ratings,
+                ...feedback
+            };
 
-        const response = await axios.post('http://localhost:3001/saveRating', ratingData, {
-            headers: { 'x-access-token': token }
-        });
+            const response = await axios.post('http://localhost:3001/saveRating', ratingData, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': "application/json",
+                    'x-access-token': token
+                },
+            });
 
-        if (response.status === 200) {
-            setShowModal(false);
-            setStudents(students.map(student => {
-                if (student._id === selectedStudent._id) {
-                    student.rated = true;
-                }
-                return student;
-            }));
+            if (response.status === 200) {
+                setShowModal(false);
+                // Update students to reflect that the selected student has been rated
+                setStudents(students.map(student => {
+                    if (student._id === selectedStudent._id) {
+                        student.rated = true; // Adjust this logic based on your implementation
+                    }
+                    return student;
+                }));
+            }
         }
     };
 
     return (
         <div className="container">
-            {students.length > 0 && (
                 <table className="table">
                     <thead>
                     <tr>
@@ -86,7 +102,7 @@ function Home(){
                     </tr>
                     </thead>
                     <tbody>
-                    {students.map(student => (
+                    {students.map((student: Student) => (
                         <tr key={student._id}>
                             <td>{student.firstName}</td>
                             <td>{student.lastName}</td>
@@ -100,7 +116,7 @@ function Home(){
                     ))}
                     </tbody>
                 </table>
-            )}
+
 
             {/* Modal for rating */}
             <Modal show={showModal} onHide={() => setShowModal(false)}>
@@ -111,10 +127,9 @@ function Home(){
                 </Modal.Header>
                 <Modal.Body>
                     <div className="rating-section">
-                        {/* Cooperation Rating */}
                         <div>
                             <strong>Cooperation</strong>
-                            {[1, 2, 3, 4].map(value => (
+                            {[1, 2, 3, 4, 5].map(value => (
                                 <label key={value}>
                                     <input
                                         type="radio"
@@ -129,11 +144,75 @@ function Home(){
                             <textarea
                                 placeholder="Optional feedback"
                                 value={feedback.CooperationFeedback}
-                                onChange={(e) => setFeedback({ ...feedback, CooperationFeedback: e.target.value })}
+                                onChange={(e) => setFeedback({...feedback, CooperationFeedback: e.target.value})}
                             />
                         </div>
-                        {/* Similar structure for other attributes... */}
-                        {/* Conceptual Contribution, Practical Contribution, Work Ethic */}
+                        <div>
+                            <strong>Conceptual Contribution</strong>
+                            {[1, 2, 3, 4, 5].map(value => (
+                                <label key={value}>
+                                    <input
+                                        type="radio"
+                                        name="Conceptual Contribution"
+                                        value={value}
+                                        checked={ratings.ConceptualContribution === value}
+                                        onChange={() => handleRatingChange('ConceptualContribution', value)}
+                                    />
+                                    {value}
+                                </label>
+                            ))}
+                            <textarea
+                                placeholder="Optional feedback"
+                                value={feedback.ConceptualContributionFeedback}
+                                onChange={(e) => setFeedback({
+                                    ...feedback,
+                                    ConceptualContributionFeedback: e.target.value
+                                })}
+                            />
+                        </div>
+                        <div>
+                            <strong>Practical Contribution</strong>
+                            {[1, 2, 3, 4, 5].map(value => (
+                                <label key={value}>
+                                    <input
+                                        type="radio"
+                                        name="Practical Contribution"
+                                        value={value}
+                                        checked={ratings.PracticalContribution === value}
+                                        onChange={() => handleRatingChange('PracticalContribution', value)}
+                                    />
+                                    {value}
+                                </label>
+                            ))}
+                            <textarea
+                                placeholder="Optional feedback"
+                                value={feedback.PracticalContributionFeedback}
+                                onChange={(e) => setFeedback({
+                                    ...feedback,
+                                    PracticalContributionFeedback: e.target.value
+                                })}
+                            />
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Work Ethic</strong>
+                        {[1, 2, 3, 4, 5].map(value => (
+                            <label key={value}>
+                                <input
+                                    type="radio"
+                                    name="Work Ethic"
+                                    value={value}
+                                    checked={ratings.WorkEthic === value}
+                                    onChange={() => handleRatingChange('WorkEthic', value)}
+                                />
+                                {value}
+                            </label>
+                        ))}
+                        <textarea
+                            placeholder="Optional feedback"
+                            value={feedback.WorkEthicFeedback}
+                            onChange={(e) => setFeedback({...feedback, WorkEthicFeedback: e.target.value})}
+                        />
                     </div>
                 </Modal.Body>
                 <Modal.Footer>
@@ -151,4 +230,3 @@ function Home(){
 
 export default Home;
 
-export default Home;
