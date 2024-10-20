@@ -69,7 +69,6 @@ app.post("/register", (req, res) => {
           password,
           role,
           groups: [],
-          ratings: [],
         });
 
         const savedUser = newUser.save();
@@ -134,6 +133,25 @@ app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} 
   .catch((err)  => res.status(500).json(err));
 });
 
+app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
+  let {user} = req.user;
+  if (!user.groups || user.groups.length === 0) {
+    return res.status(400).json({ error: "User does not belong to any group" });
+  }
+
+  const groupId = user.groups[0]; // Assuming user belongs to one group, use the first group ID
+
+  GroupModel.findById(groupId)
+      .populate("students") // populating students in the group
+      .then((group) => {
+        if (!group) {
+          return res.status(404).json({ error: "Group not found" });
+        }
+        return res.status(200).json({ group });
+      })
+      .catch((err) => res.status(500).json({ error: err.message }));
+});
+
 //handling group creation
 app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
   const userId = req.user.id; // Extract user ID from JWT
@@ -151,7 +169,8 @@ app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: Strin
         const group = {
           name: name,
           instructor: user,
-          students: []
+          students: [],
+          ratings: []
         };
 
         GroupModel.create(group)
@@ -222,6 +241,45 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
         }
       })
       .catch((err) => res.status(500).json(err));
+  }
+});
+
+app.post('/saveRating', verifyJWT, async (req, res) => {
+  const { rateeId, Cooperation, ConceptualContribution, PracticalContribution, WorkEthic, CooperationFeedback, ConceptualContributionFeedback, PracticalContributionFeedback, WorkEthicFeedback } = req.body;
+  const userId = req.user.id;
+  const groupId = req.user.groups.id;
+  try {
+    // Check if the group exists
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: 'Group not found' });
+    }
+
+    // Create a new rating
+    const newRating = new RatingsModel({
+      rater: userId,
+      ratee: rateeId,
+      Cooperation,
+      CooperationFeedback,
+      ConceptualContribution,
+      ConceptualContributionFeedback,
+      PracticalContribution,
+      PracticalContributionFeedback,
+      WorkEthic,
+      WorkEthicFeedback,
+    });
+
+    // Save the rating
+    const savedRating = await newRating.save();
+
+    // Add the rating to the group's ratings array
+    group.ratings.push(savedRating._id);
+    await group.save();
+
+    res.status(200).json({ message: 'Rating saved successfully', rating: savedRating });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

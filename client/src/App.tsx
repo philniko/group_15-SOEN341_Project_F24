@@ -19,7 +19,7 @@ function App() {
       <>
         <NavbarStudent />
         <Routes>
-          <Route path="/home" element={<HomeStudent />} />
+          <Route path="/Home" element={<HomeStudent />} />
         </Routes>
       </>
   );
