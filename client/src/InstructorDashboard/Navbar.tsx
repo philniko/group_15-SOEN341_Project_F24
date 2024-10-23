@@ -19,7 +19,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <h1 className="logo">
-        {user ? `${user.firstname}` : 'Welcome'} {/* Display first name if available */}
+        {user ? `${user.firstName}` : 'Welcome'} {/* Display first name if available */}
       </h1>
       <ul className={isMobile ? "nav-links-mobile" : "nav-links"} onClick={() => setIsMobile(false)}>
         <li><a href="Home">Home</a></li>

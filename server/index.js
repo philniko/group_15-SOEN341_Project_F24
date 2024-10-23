@@ -92,7 +92,7 @@ app.post("/login", (req, res) => {
       );
       if (validPassword) {
         //generate token
-        const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+        const token = jwt.sign({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role }, JWT_SECRET, {
           expiresIn: "1h",
         });
         res.status(200).json({ role: user.role, token: token });
@@ -127,9 +127,9 @@ app.post("/getGroups", verifyJWT, (req, res) => {
 app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
   let { id } = req.body;
   GroupModel.findById(id)
-  .populate({path: "students"})
-  .then((group) => res.status(200).json({group: group}))
-  .catch((err)  => res.status(500).json(err));
+    .populate({ path: "students" })
+    .then((group) => res.status(200).json({ group: group }))
+    .catch((err) => res.status(500).json(err));
 });
 
 //handling group creation
@@ -177,7 +177,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
     res.status(400).json("Missing student email");
   }
   else {
-    UserModel.findOne({email: userEmail})
+    UserModel.findOne({ email: userEmail })
       .then((user) => {
         if (!user) {
           res.status(400).json("User does not exit");
