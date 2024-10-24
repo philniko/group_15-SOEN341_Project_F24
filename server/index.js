@@ -37,19 +37,19 @@ app.post("/register", (req, res) => {
 
   //making sure all fields are filled
   if (!firstName) {
-    return res.status(400).json("Please enter a first name");
+    return res.status(400).json({type: "firstName", message: "Please enter your first name!"});
   }
   if (!lastName) {
-    return res.status(400).json("Please enter a last name");
+    return res.status(400).json({type: "lastName", message: "Please enter your last name!"});
   }
   if (!email) {
-    return res.status(400).json("Please enter an email");
+    return res.status(400).json({type: "email", message: "Please enter your email!"});
   }
   if (!password) {
-    return res.status(400).json("Please enter a password");
+    return res.status(400).json({type: "password", message: "Please enter your password!"});
   }
   if (!role) {
-    return res.status(400).json("Please chose a role");
+    return res.status(400).json({type: "role", message: "Please choose your role!"});
   }
 
   //checking to see if the user already exists
@@ -58,7 +58,7 @@ app.post("/register", (req, res) => {
       email: email
     }).then((user) => {
       if (user) {
-        return res.status(409).json("Email is already taken");
+        return res.status(409).json({type: "email", message: "The email has already been taken!"});
       } else {
         //create new user, password is hashed in UserSchema.js
         const newUser = new UserModel({
@@ -76,7 +76,7 @@ app.post("/register", (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json("Server Registration Error");
+    res.status(500).json({type: "server", message: "Server Registration Error"});
   }
 });
 

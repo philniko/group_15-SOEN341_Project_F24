@@ -9,6 +9,8 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("");
+  const [errorType, setErrorType] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const navigate = useNavigate();
 
@@ -20,7 +22,10 @@ function Register() {
         console.log(result);
         navigate("/login");
       })
-      .catch((err) => console.log(err));
+      .catch((error) => {
+        setErrorType(String(error.response.data.type));
+        setErrorMessage(String(error.response.data.message));
+      });
   };
 
   return (
@@ -35,9 +40,10 @@ function Register() {
                 name="firstName"
                 placeholder="First Name"
                 autoComplete="off"
-                className="form-control rounded-pill"
+                className={"form-control rounded-pill" + (errorType == "firstName" ? " border border-danger" : "")}
                 onChange={(e: any) => setFirstName(e.target.value)}
               />
+              {errorType == "firstName" ? <small className="text-danger">{errorMessage}</small> : null}
             </div>
             <div className="col">
               <input
@@ -45,9 +51,10 @@ function Register() {
                 name="lastName"
                 placeholder="Last Name"
                 autoComplete="off"
-                className="form-control rounded-pill"
+                className={"form-control rounded-pill" + (errorType == "lastName" ? " border border-danger" : "")}
                 onChange={(e: any) => setLastName(e.target.value)}
               />
+              {errorType == "lastName" ? <small className="text-danger">{errorMessage}</small> : null}
             </div>
           </div>
           <div className="mb-3 position-relative">
@@ -56,18 +63,20 @@ function Register() {
               name="email"
               placeholder="Email"
               autoComplete="off"
-              className="form-control rounded-pill pl-4"
+              className={"form-control rounded-pill pl-4" + (errorType == "email" ? " border border-danger" : "")}
               onChange={(e: any) => setEmail(e.target.value)}
             />
+            {errorType == "email" ? <small className="text-danger">{errorMessage}</small> : null}
           </div>
           <div className="mb-3 position-relative">
             <input
               type="password"
               name="password"
               placeholder="Password"
-              className="form-control rounded-pill pl-4"
+              className={"form-control rounded-pill pl-4" + (errorType == "password" ? " border border-danger" : "")}
               onChange={(e: any) => setPassword(e.target.value)}
             />
+            {errorType == "password" ? <small className="text-danger">{errorMessage}</small> : null}
           </div>
           <div className="mb-4 d-flex flex-column">
             <div className="d-flex">
@@ -79,7 +88,7 @@ function Register() {
                 id="student"
                 name="role"
                 value="student"
-                className="form-check-input me-4 border-dark"
+                className={"form-check-input me-4" + (errorType == "role" ? " border-danger" : " border-dark")}
                 onChange={(e) => setRole(e.target.value)}
               />
               <label htmlFor="instructor" className="me-2">
@@ -90,9 +99,10 @@ function Register() {
                 id="instructor"
                 name="role"
                 value="instructor"
-                className="form-check-input me-4 border-dark"
+                className={"form-check-input me-4" + (errorType == "role" ? " border-danger" : " border-dark")}
                 onChange={(e) => setRole(e.target.value)}
               />
+              {errorType == "role" ? <small className="text-danger">{errorMessage}</small> : null}
             </div>
           </div>
           <button type="submit" className="btn btn-primary w-100 rounded-pill" style={{ transition: '0.3s' }}>
