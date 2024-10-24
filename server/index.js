@@ -84,7 +84,7 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
-      res.status(404).json("User does not exist");
+      res.status(404).json({type: "general", message: "Incorrect email or password!"});
     } else {
       const validPassword = bcrypt.compareSync(
         req.body.password,
@@ -97,7 +97,7 @@ app.post("/login", (req, res) => {
         });
         res.status(200).json({ role: user.role, token: token });
       } else {
-        res.status(401).json("Invalid password");
+        res.status(401).json({type: "general", message: "Incorrect email or password!"});
       }
     }
   });
