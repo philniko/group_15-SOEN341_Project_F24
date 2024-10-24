@@ -1,10 +1,13 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { useParams } from 'react-router-dom';
 
 function Group() {
     let { id } = useParams();
+    const studentEmailInput = useRef<HTMLInputElement>(null);
     const [studentEmail, setStudentEmail] = useState("");
     const [students, setStudents] = useState<{_id: String, firstName: String, lastName: String}[]>([]);
+    const [messageType, setMessageType] = useState("");
+    const [message, setMessage] = useState("");
 
     let updateStudents = async () => {
         const token = localStorage.getItem('token') || "";
@@ -24,19 +27,41 @@ function Group() {
     }
     
     let addStudent = async () => {
-        const token = localStorage.getItem("token") || "";
-        const response = await fetch("http://localhost:3001/addStudent", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-access-token": token
-            },
-            body: JSON.stringify({groupId: id, userEmail: studentEmail})
-        });
 
-        if (response.ok) {
-            setStudentEmail("");
-            updateStudents();
+        if (studentEmail === "") {
+            setMessageType("error");
+            setMessage("Please enter a student email!");
+        }
+        else {
+            const token = localStorage.getItem("token") || "";
+            const response = await fetch("http://localhost:3001/addStudent", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-access-token": token
+                },
+                body: JSON.stringify({groupId: id, userEmail: studentEmail})
+            });
+
+            if (response.ok) {
+                if (studentEmailInput.current) {
+                    studentEmailInput.current.value = "";
+                }
+
+                setStudentEmail("");
+                updateStudents();
+                setMessageType("success");
+                setMessage("Student successfully added!");
+            }
+            else if (response.status == 400) {
+                const data = await response.json();
+                setMessageType(data.type);
+                setMessage(data.message);
+            }
+            else {
+                setMessageType("error");
+                setMessage("An error occurred :(");
+            }
         }
     }
 
@@ -52,8 +77,14 @@ function Group() {
                         Number of Students: {students.length}
                     </div>
                     <div className='col-7 text-end'>
-                        <input onChange={(e) => {setStudentEmail(e.target.value)}}></input>
                         <button onClick={() => addStudent()}>Add Student</button>
+                        <input
+                            ref={studentEmailInput}
+                            placeholder="Student Email"
+                            onChange={(e) => {setStudentEmail(e.target.value)}}
+                            className={messageType == "error" ? "border border-danger" : ""}>
+                        </input>
+                        <br /> {message == "" ? null : <small className={messageType == "error" ? "text-danger" : "text-success"}>{message}</small>}
                     </div>
                 </div>
     

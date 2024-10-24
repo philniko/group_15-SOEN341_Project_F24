@@ -1,40 +1,34 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [errorMessage, setErrorMessage] = useState("");
     const navigate = useNavigate();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        setError('');
 
-        try {
-            const response = await fetch('http://localhost:3001/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
+        const response = await fetch('http://localhost:3001/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email, password }),
+        });
 
+        if (response.status == 200) {
             const data = await response.json();
 
-            if (response.status === 200) {
-                // Store the JWT token in local storage
-                localStorage.setItem('token', data.token);
-                console.log('login data: ', data);
-                navigate('/' + data.role + '/home'); // Redirect to dashboard/home page
-
-            } else {
-                setError(data);
-            }
-        } catch (error: any) {
-            setError(error);
+            // Store the JWT token in local storage
+            localStorage.setItem('token', data.token);
+            navigate('/' + data.role + '/home'); // Redirect to dashboard/home page
+        }
+        else {
+            const data = await response.json();
+            setErrorMessage(data.message);
         }
     };
 
@@ -49,7 +43,7 @@ function Login() {
                             name="email"
                             placeholder="Email"
                             autoComplete="off"
-                            className="form-control rounded-pill pl-4"
+                            className={"form-control rounded-pill pl-4" + (errorMessage != "" ? " border border-danger" : "")}
                             onChange={(e: any) => setEmail(e.target.value)}
                         />
                     </div>
@@ -58,12 +52,13 @@ function Login() {
                             type="password"
                             name="password"
                             placeholder="Password"
-                            className="form-control rounded-pill pl-4"
+                            className={"form-control rounded-pill pl-4" + (errorMessage != "" ? " border border-danger" : "")}
                             onChange={(e: any) => setPassword(e.target.value)}
                         />
+                        {errorMessage == "" ? null : <small className="text-danger">{errorMessage}</small>}
                     </div>
                     <button type="submit" className="btn btn-primary w-100 rounded-pill" style={{ transition: '0.3s' }}>
-                        Connect
+                        Login
                     </button>
                 </form>
                 <p className="text-center mt-3">Don't have an account?</p>
