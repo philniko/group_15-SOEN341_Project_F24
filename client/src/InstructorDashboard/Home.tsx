@@ -1,25 +1,45 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 
 function Home(){
     const navigate = useNavigate();
+    const groupNameInput = useRef<HTMLInputElement>(null);
     const [groupName, setGroupName] = useState("");
     const [groups, setGroups] = useState<{_id: String, name: String, students: []}[]>([]);
+    const [messageType, setMessageType] = useState("");
+    const [message, setMessage] = useState("");
 
     const createGroup = async () => {
-        const token = localStorage.getItem('token') || "";
-        const response = await fetch("http://localhost:3001/createGroup", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-access-token": token
-            },
-            body: JSON.stringify({name: groupName})
-        });
 
-        if (response.ok) {
-            setGroupName("");
-            updateGroups();
+        if (groupName === "") {
+            setMessageType("error");
+            setMessage("Please enter a team name!");
+        }
+        else {
+            const token = localStorage.getItem('token') || "";
+            const response = await fetch("http://localhost:3001/createGroup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-access-token": token
+                },
+                body: JSON.stringify({name: groupName})
+            });
+
+            if (response.ok) {
+                if (groupNameInput.current) {
+                    groupNameInput.current.value = "";
+                }
+                
+                setGroupName("");
+                updateGroups();
+                setMessageType("success");
+                setMessage("Group creation success!");
+            }
+            else {
+                setMessageType("error");
+                setMessage("An error occurred :(");
+            }
         }
     }
     
@@ -51,8 +71,14 @@ function Home(){
                         Number of Groups: {groups.length}
                     </div>
                     <div className='col-7 text-end'>
-                        <input onChange={(e) => {setGroupName(e.target.value)}}></input>
-                        <button onClick={() => createGroup()}>Create Group</button>
+                        <button onClick={() => createGroup()} className="mr-sm">Create Group</button>
+                        <input 
+                            ref={groupNameInput}
+                            placeholder="Group Name"
+                            onChange={(e) => {setGroupName(e.target.value)}}
+                            className={messageType == "error" ? "border border-danger" : ""}>
+                        </input>
+                        <br /> {message == "" ? null : <small className={messageType == "error" ? "text-danger" : "text-success"}>{message}</small>}
                     </div>
                 </div>
     
