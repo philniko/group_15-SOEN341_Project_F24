@@ -117,11 +117,11 @@ app.post("/getGroups", verifyJWT, (req, res) => {
     })
     .then((user) => {
       if (!user) {
-        return res.status(400).json("User not found");
+        return res.status(400).json({type: "error", message: "User not found"});
       }
       return res.status(200).json({ groups: user.groups });
     })
-    .catch((err) => res.status(500).json(err));
+    .catch(() => res.status(500).json({type: "error", message: "Server error"}));
 });
 
 app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
@@ -171,25 +171,25 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
   const { groupId, userEmail } = req.body;
 
   if (!groupId) {
-    res.status(400).json("Missing group id");
+    res.status(400).json({type: "error", message: "Missing group id!"});
   }
   else if (!userEmail) {
-    res.status(400).json("Missing student email");
+    res.status(400).json({type: "error", message: "Missing student email!"});
   }
   else {
     UserModel.findOne({ email: userEmail })
       .then((user) => {
         if (!user) {
-          res.status(400).json("User does not exit");
+          res.status(400).json({type: "error", message: "User does not exit!"});
         }
         else if (user.role != "student") {
-          res.status(400).json("User is not a student");
+          res.status(400).json({type: "error", message: "User is not a student!"});
         }
         else {
           GroupModel.findById(groupId)
             .then((group) => {
               if (!group) {
-                res.status(400).json("Group does not exist");
+                res.status(400).json({type: "error", message: "Group does not exist!"});
               }
               else {
                 let valid = true;
@@ -202,7 +202,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
                 }
 
                 if (!valid) {
-                  res.status(400).json("User is already a member of the group");
+                  res.status(400).json({type: "error", message: "User is already a member of the group!"});
                 }
                 else {
                   //updating student groups and group students arrays
