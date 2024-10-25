@@ -38,19 +38,19 @@ app.post("/register", (req, res) => {
 
   //making sure all fields are filled
   if (!firstName) {
-    return res.status(400).json("Please enter a first name");
+    return res.status(400).json({type: "firstName", message: "Please enter your first name!"});
   }
   if (!lastName) {
-    return res.status(400).json("Please enter a last name");
+    return res.status(400).json({type: "lastName", message: "Please enter your last name!"});
   }
   if (!email) {
-    return res.status(400).json("Please enter an email");
+    return res.status(400).json({type: "email", message: "Please enter your email!"});
   }
   if (!password) {
-    return res.status(400).json("Please enter a password");
+    return res.status(400).json({type: "password", message: "Please enter your password!"});
   }
   if (!role) {
-    return res.status(400).json("Please chose a role");
+    return res.status(400).json({type: "role", message: "Please choose your role!"});
   }
 
   //checking to see if the user already exists
@@ -59,7 +59,7 @@ app.post("/register", (req, res) => {
       email: email
     }).then((user) => {
       if (user) {
-        return res.status(409).json("Email is already taken");
+        return res.status(409).json({type: "email", message: "The email has already been taken!"});
       } else {
         //create new user, password is hashed in UserSchema.js
         const newUser = new UserModel({
@@ -77,7 +77,7 @@ app.post("/register", (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json("Server Registration Error");
+    res.status(500).json({type: "server", message: "Server Registration Error"});
   }
 });
 
@@ -85,7 +85,7 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
-      res.status(404).json("User does not exist");
+      res.status(404).json({type: "general", message: "Incorrect email or password!"});
     } else {
       const validPassword = bcrypt.compareSync(
         req.body.password,
@@ -93,12 +93,12 @@ app.post("/login", (req, res) => {
       );
       if (validPassword) {
         //generate token
-        const token = jwt.sign({ id: user._id, role: user.role }, JWT_SECRET, {
+        const token = jwt.sign({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role }, JWT_SECRET, {
           expiresIn: "1h",
         });
         res.status(200).json({ role: user.role, token: token });
       } else {
-        res.status(401).json("Invalid password");
+        res.status(401).json({type: "general", message: "Incorrect email or password!"});
       }
     }
   });
@@ -118,19 +118,19 @@ app.post("/getGroups", verifyJWT, (req, res) => {
     })
     .then((user) => {
       if (!user) {
-        return res.status(400).json("User not found");
+        return res.status(400).json({type: "error", message: "User not found"});
       }
       return res.status(200).json({ groups: user.groups });
     })
-    .catch((err) => res.status(500).json(err));
+    .catch(() => res.status(500).json({type: "error", message: "Server error"}));
 });
 
 app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
   let { id } = req.body;
   GroupModel.findById(id)
-  .populate({path: "students"})
-  .then((group) => res.status(200).json({group: group}))
-  .catch((err)  => res.status(500).json(err));
+    .populate({ path: "students" })
+    .then((group) => res.status(200).json({ group: group }))
+    .catch((err) => res.status(500).json(err));
 });
 
 app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
@@ -192,25 +192,25 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
   const { groupId, userEmail } = req.body;
 
   if (!groupId) {
-    res.status(400).json("Missing group id");
+    res.status(400).json({type: "error", message: "Missing group id!"});
   }
   else if (!userEmail) {
-    res.status(400).json("Missing student email");
+    res.status(400).json({type: "error", message: "Missing student email!"});
   }
   else {
-    UserModel.findOne({email: userEmail})
+    UserModel.findOne({ email: userEmail })
       .then((user) => {
         if (!user) {
-          res.status(400).json("User does not exit");
+          res.status(400).json({type: "error", message: "User does not exit!"});
         }
         else if (user.role != "student") {
-          res.status(400).json("User is not a student");
+          res.status(400).json({type: "error", message: "User is not a student!"});
         }
         else {
           GroupModel.findById(groupId)
             .then((group) => {
               if (!group) {
-                res.status(400).json("Group does not exist");
+                res.status(400).json({type: "error", message: "Group does not exist!"});
               }
               else {
                 let valid = true;
@@ -223,7 +223,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
                 }
 
                 if (!valid) {
-                  res.status(400).json("User is already a member of the group");
+                  res.status(400).json({type: "error", message: "User is already a member of the group!"});
                 }
                 else {
                   //updating student groups and group students arrays
