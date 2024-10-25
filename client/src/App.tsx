@@ -26,7 +26,7 @@ function App() {
         <NavbarStudent />
         <Routes>
           <Route path="/home" element={<HomeStudent />} />
-            <Route path="group/:id" element={<StudentGroup />}></Route>
+            <Route path="group/:groupId" element={<StudentGroup />}></Route>
         </Routes>
       </>
   );

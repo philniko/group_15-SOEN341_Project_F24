@@ -248,7 +248,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
 app.post('/saveRating', verifyJWT, async (req, res) => {
   const { rateeId, Cooperation, ConceptualContribution, PracticalContribution, WorkEthic, CooperationFeedback, ConceptualContributionFeedback, PracticalContributionFeedback, WorkEthicFeedback } = req.body;
   const userId = req.user.id;
-  const groupId = req.user.groups.id;
+  const groupId = req.body.groupId;
   let existingRating;
   try {
     // Check if the group exists
@@ -296,10 +296,10 @@ app.post('/saveRating', verifyJWT, async (req, res) => {
                   newRating.save();
                   res.status(200).json(group);
                 })
-                .catch((err) => res.status(500).json(err));
+                .catch((err) => res.status(400).json(err));
           }
         })
-    res.status(200).json({ message: 'Rating saved successfully', rating: savedRating });
+    res.status(200).json({ message: 'Rating saved successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
