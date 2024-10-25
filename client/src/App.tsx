@@ -3,6 +3,7 @@ import Register from './Register'
 import Login from './Login'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 
+import StudentGroup from './StudentDashboard/StudentGroup.tsx'
 import HomeStudent from './StudentDashboard/Home.tsx'
 import NavbarStudent from './StudentDashboard/Navbar.tsx'
 import './StudentDashboard/StudentDashboard.css'
@@ -25,6 +26,7 @@ function App() {
         <NavbarStudent />
         <Routes>
           <Route path="/home" element={<HomeStudent />} />
+            <Route path="group/:id" element={<StudentGroup />}></Route>
         </Routes>
       </>
   );
@@ -47,7 +49,7 @@ function App() {
         <Route path="/register" element={<Register />} />
 
         {/* Routes with Sidebar */}
-        <Route path="/*" element={<ProtectedRoute element={StudentDashboard} />} />
+        <Route path="/student/*" element={<ProtectedRoute element={StudentDashboard} />} />
         <Route path="/instructor/*" element={<ProtectedRoute element={InstructorDashboard} />} />
       </Routes>
     </BrowserRouter>
