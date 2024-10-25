@@ -1,7 +1,6 @@
 import {useParams} from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
-import axios from 'axios';
 
 // Define a Student interface
 interface Student {
@@ -32,7 +31,6 @@ function StudentGroup() {
 
     const fetchGroupData = async () => {
         const token = localStorage.getItem('token') || '';
-        console.log(token);
         const response = await fetch("http://localhost:3001/getGroup", {
             method: "POST",
             headers: {
@@ -44,7 +42,6 @@ function StudentGroup() {
 
         if (response.ok) {
             const data = await response.json();
-            console.log(data);
             setStudents(data.group.students || []);
         }
     };
@@ -67,17 +64,19 @@ function StudentGroup() {
         if (selectedStudent) {
             const token = localStorage.getItem('token') || '';
             const ratingData = {
+                groupId: groupId,
                 rateeId: selectedStudent._id,
                 ...ratings,
                 ...feedback
             };
 
-            const response = await axios.post('http://localhost:3001/saveRating', ratingData, {
+            const response = await fetch('http://localhost:3001/saveRating', {
                 method: 'POST',
                 headers: {
                     'Content-Type': "application/json",
                     'x-access-token': token
                 },
+                body: JSON.stringify(ratingData)
             });
 
             if (response.status === 200) {
@@ -125,7 +124,7 @@ function StudentGroup() {
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
                     <Modal.Title>
-                        Rate {selectedStudent?.firstName} {selectedStudent?.lastName}
+                        Rate {selectedStudent?.firstName} {selectedStudent?.lastName} {selectedStudent?.email}
                     </Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
