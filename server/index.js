@@ -1,4 +1,4 @@
-import express, {response} from "express";
+import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
@@ -6,7 +6,6 @@ import GroupModel from "./models/Group.js";
 import RatingModel from "./models/Ratings.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
-import group from "./models/Group.js";
 
 const JWT_SECRET = "secret";
 // server/index.js
@@ -252,54 +251,66 @@ app.post('/saveRating', verifyJWT, async (req, res) => {
   let existingRating;
   try {
     // Check if the group exists
-    GroupModel.findById(groupId)
+    GroupModel.findById(groupId).populate('ratings')
         .then((group) => {
+          console.log(typeof(userId));
           if (!group) {
             return res.status(404).json({ message: 'Group not found' });
           }
+          const raterObjectID = new mongoose.Types.ObjectId(userId);
+          const rateeObjectID = new mongoose.Types.ObjectId(rateeId);
+
           let Rating = group.ratings
-          for (let i=0; i<group.ratings.length;i++){
-            if (Rating[i].ratee.equals(rateeId) && Rating[i].rater.equals(userId)) {
-               existingRating = Rating[i];
-              break;
+          console.log(Rating[0]);
+          if (Rating.length > 0) {
+            for (let i = 0; i < group.ratings.length; i++) {
+              if (Rating[i].ratee.equals(rateeObjectID) && Rating[i].rater.equals(raterObjectID)) {
+                existingRating = Rating[i];
+                break;
+              }
             }
           }
           if (existingRating){
-            existingRating.Cooperation = Cooperation;
+            existingRating.CooperationRating = Cooperation;
             existingRating.CooperationFeedback = CooperationFeedback;
-            existingRating.ConceptualContribution = ConceptualContribution;
+            existingRating.ConceptualContributionRating = ConceptualContribution;
             existingRating.ConceptualContributionFeedback = ConceptualContributionFeedback;
-            existingRating.PracticalContribution = PracticalContribution;
+            existingRating.PracticalContributionRating = PracticalContribution;
             existingRating.PracticalContributionFeedback = PracticalContributionFeedback;
-            existingRating.WorkEthic = WorkEthic;
+            existingRating.WorkEthicRating = WorkEthic;
             existingRating.WorkEthicFeedback = WorkEthicFeedback;
             existingRating.save();
           }
           else {
             // Create a new rating
             const newRating ={
-              rater: userId,
-              ratee: rateeId,
-              Cooperation: Cooperation,
+              rater: raterObjectID,
+              ratee: rateeObjectID,
+              CooperationRating: Cooperation,
               CooperationFeedback: CooperationFeedback,
-              ConceptualFeedback: ConceptualContribution,
-              ConceptualContribution: ConceptualContributionFeedback,
-              PracticalContribution: PracticalContribution,
+              ConceptualContributionRating: ConceptualContribution,
+              ConceptualContributionFeedback: ConceptualContributionFeedback,
+              PracticalContributionRating: PracticalContribution,
               PracticalContributionFeedback: PracticalContributionFeedback,
-              WorkEthic: WorkEthic,
+              WorkEthicRating: WorkEthic,
               WorkEthicFeedback: WorkEthicFeedback,
             };
+            console.log(raterObjectID);
+            console.log(typeof(newRating.WorkEthic));
+            console.log(typeof(newRating.WorkEthicFeedback));
             RatingModel.create(newRating)
-                .then((group) =>{
-                  group.ratings.push(newRating._id)
-                  group.save();
-                  newRating.save();
-                  res.status(200).json(group);
+                .then((createdRating) =>{
+                  group.ratings.push(createdRating._id)
+                  return group.save();
+                })
+                .then(()=> {
+                  console.log("Before Save")
+                  res.status(200).json({message: "Successful save"});
+                  console.log("After Save")
                 })
                 .catch((err) => res.status(400).json(err));
           }
         })
-    res.status(200).json({ message: 'Rating saved successfully' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
