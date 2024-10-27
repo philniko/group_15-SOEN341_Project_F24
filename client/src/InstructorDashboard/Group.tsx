@@ -5,7 +5,7 @@ function Group() {
     let { id } = useParams();
     const studentEmailInput = useRef<HTMLInputElement>(null);
     const [studentEmail, setStudentEmail] = useState("");
-    const [students, setStudents] = useState<{_id: String, firstName: String, lastName: String}[]>([]);
+    const [students, setStudents] = useState<{_id: string, firstName: string, lastName: string}[]>([]);
     const [messageType, setMessageType] = useState("");
     const [message, setMessage] = useState("");
 
