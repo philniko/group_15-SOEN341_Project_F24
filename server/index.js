@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
+import RatingModel from "./models/Ratings.js"
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -132,6 +133,25 @@ app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} 
     .catch((err) => res.status(500).json(err));
 });
 
+app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
+  let {user} = req.user;
+  if (!user.groups || user.groups.length === 0) {
+    return res.status(400).json({ error: "User does not belong to any group" });
+  }
+
+  const groupId = user.groups[0]; // Assuming user belongs to one group, use the first group ID
+
+  GroupModel.findById(groupId)
+      .populate("students") // populating students in the group
+      .then((group) => {
+        if (!group) {
+          return res.status(404).json({ error: "Group not found" });
+        }
+        return res.status(200).json({ group });
+      })
+      .catch((err) => res.status(500).json({ error: err.message }));
+});
+
 //handling group creation
 app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
   const userId = req.user.id; // Extract user ID from JWT
@@ -149,7 +169,8 @@ app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: Strin
         const group = {
           name: name,
           instructor: user,
-          students: []
+          students: [],
+          ratings: []
         };
 
         GroupModel.create(group)
@@ -220,6 +241,79 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
         }
       })
       .catch((err) => res.status(500).json(err));
+  }
+});
+
+app.post('/saveRating', verifyJWT, async (req, res) => {
+  const { rateeId, Cooperation, ConceptualContribution, PracticalContribution, WorkEthic, CooperationFeedback, ConceptualContributionFeedback, PracticalContributionFeedback, WorkEthicFeedback } = req.body;
+  const userId = req.user.id;
+  const groupId = req.body.groupId;
+  let existingRating;
+  try {
+    // Check if the group exists
+    GroupModel.findById(groupId).populate('ratings')
+        .then((group) => {
+          console.log(typeof(userId));
+          if (!group) {
+            return res.status(404).json({ message: 'Group not found' });
+          }
+          const raterObjectID = new mongoose.Types.ObjectId(userId);
+          const rateeObjectID = new mongoose.Types.ObjectId(rateeId);
+
+          let Rating = group.ratings
+          console.log(Rating[0]);
+          if (Rating.length > 0) {
+            for (let i = 0; i < group.ratings.length; i++) {
+              if (Rating[i].ratee.equals(rateeObjectID) && Rating[i].rater.equals(raterObjectID)) {
+                existingRating = Rating[i];
+                break;
+              }
+            }
+          }
+          if (existingRating){
+            existingRating.CooperationRating = Cooperation;
+            existingRating.CooperationFeedback = CooperationFeedback;
+            existingRating.ConceptualContributionRating = ConceptualContribution;
+            existingRating.ConceptualContributionFeedback = ConceptualContributionFeedback;
+            existingRating.PracticalContributionRating = PracticalContribution;
+            existingRating.PracticalContributionFeedback = PracticalContributionFeedback;
+            existingRating.WorkEthicRating = WorkEthic;
+            existingRating.WorkEthicFeedback = WorkEthicFeedback;
+            existingRating.save();
+          }
+          else {
+            // Create a new rating
+            const newRating ={
+              rater: raterObjectID,
+              ratee: rateeObjectID,
+              CooperationRating: Cooperation,
+              CooperationFeedback: CooperationFeedback,
+              ConceptualContributionRating: ConceptualContribution,
+              ConceptualContributionFeedback: ConceptualContributionFeedback,
+              PracticalContributionRating: PracticalContribution,
+              PracticalContributionFeedback: PracticalContributionFeedback,
+              WorkEthicRating: WorkEthic,
+              WorkEthicFeedback: WorkEthicFeedback,
+            };
+            console.log(raterObjectID);
+            console.log(typeof(newRating.WorkEthic));
+            console.log(typeof(newRating.WorkEthicFeedback));
+            RatingModel.create(newRating)
+                .then((createdRating) =>{
+                  group.ratings.push(createdRating._id)
+                  return group.save();
+                })
+                .then(()=> {
+                  console.log("Before Save")
+                  res.status(200).json({message: "Successful save"});
+                  console.log("After Save")
+                })
+                .catch((err) => res.status(400).json(err));
+          }
+        })
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
   }
 });
 

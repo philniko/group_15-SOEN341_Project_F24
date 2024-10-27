@@ -35,7 +35,6 @@ const UserSchema = new mongoose.Schema({
         ref: 'Group'
     }]
 
-
     })
 
     //Hashing logic
