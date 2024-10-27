@@ -1,0 +1,22 @@
+Meeting Minutes #4
+Date: Sunday October 6th 2024
+Time: 12:00am-1:00am
+Present: Carlo Ramadori, Zachary Corber, Omar Chabti, Kevin Liu, Charles, Philip Nikolov
+Sprint: Sprint 2
+
+Goals:
+1. Refactoring Current Code
+2. Discuss and create issues for Sprint 2
+
+Summary:
+* Sidebar and User Settings will be removed from Intructor and Student Dashboard, replaced with Navbar in the header.
+* Logout button will be added to top right of the Student and Instructor dashboard header
+* Ability for instructor to create groups using a form in the Intructor Dashboard
+* Create and implement the team member evaluation page, this task can only happen when other group pages are set up
+* Created tasks for these issues, along with assigning tasks 
+* Added new iterations 3, October 8-15 and 4, October 16-27.
+
+Next Meeting Plans:
+1. Check up for progress
+2. Assign new tasks
+
