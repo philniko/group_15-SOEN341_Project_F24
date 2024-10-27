@@ -1,0 +1,19 @@
+Meeting Minutes #5
+Date: October 19th 2024
+Time: 4:00-5:00
+Present: Carlo Ramadori, Zachary Corber, Omar Chabti, Kevin Liu, Charles, Philip Nikolov
+Sprint: Sprint 2
+Goals:
+1. See where everyone is at on their task
+2. Reformat GitHub for better project planning
+
+Summary:
+* In future Sprints, will create User Stories first, then create tasks based on accomplishing those user stories
+* Carlo is working on the student interface for rating teammates, Kevin finished Instructor�s ability to create groups
+* Zach will style all code for the interfaces, making them concurrent with Instructor and Student
+* Charles will fix bugs in Login, so error message is displayed on user interface when an email is already in use by another account, wrong password or email, and mentioning if a login attempt is made with an email that is not registered
+* Phil is working on the logout button implementation and fixing the Welcome page for the Student and Instructor dashboard, as it does not currently display the name fo the student but only 'undefined', when it should say 'Welcome (StudentName)'
+* Acceptance criteria for the login and registration implementation was done by Kevin
+* Omar is working on the acceptance criteria for the other Sprint 1 functionalities.
+
+
