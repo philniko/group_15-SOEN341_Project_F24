@@ -1,0 +1,34 @@
+Meeting Minutes #2
+Date: September 22th 2024
+Time: 7:30-8:45
+Present: Carlo Ramadori, Zachary Corber, Omar Chabti, Kevin Liu, Charles, Philip Nikolov
+Sprint: Sprint 1
+
+Goals:
+1. Split up tasks among group members
+2. Review video we all watched on React, MongoDB, Node and Express
+3. Add issues with iterations, story points and assignees
+
+Summary:
+
+To protect the GitHub, we made it not possible to push directly to the main branch.
+but to create a branch then create a pull request to merge the branches.
+Created a branch for the readme file.
+Reviewed the code from the video about MongoDB, React, Express, Node
+ so we could all better understand those languages to start the coding process.
+ We assigned Phil, Kevin and Omar to backend and Carlo, Charles and Zach to front end.
+ Created issues Implement backend for login register, implement team creation feature,
+ add How to run section in README file, Implement frontend for login component,
+ implement frontend for register component, implement frontend teacher dashboard,
+ implement student dashboard, implement student and teacher models for database and
+ implement the group model.
+ Assigned story points for each task and set the milestone to Sunday September 29th
+ which is the sprint 1 deadline, and all these tasks were put into iteration 2
+ which is due by Sunday which is the dealine for sprint 1.
+ Assigned roles for each member of the group in the GitHub
+
+Next Meeting Plans:
+1. See what everyone is struggling with in the issues
+2. Discuss if more time is needed or if more issues need to be added
+Next Meeting: Tuesday September 22, 2024, 1:00pm
+
