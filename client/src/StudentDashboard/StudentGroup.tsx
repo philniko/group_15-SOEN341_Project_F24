@@ -51,8 +51,68 @@ function StudentGroup() {
     fetchGroupData();
   }, []);
 
-  const handleRateStudent = (student: Student) => {
+  const resetRatingsAndFeedback = () => {
+    setRatings({
+      Cooperation: 0,
+      ConceptualContribution: 0,
+      PracticalContribution: 0,
+      WorkEthic: 0,
+    });
+    setFeedback({
+      CooperationFeedback: '',
+      ConceptualContributionFeedback: '',
+      PracticalContributionFeedback: '',
+      WorkEthicFeedback: '',
+    });
+  };
+
+  const handleRateStudent = async (student: Student) => {
     setSelectedStudent(student);
+
+    const token = localStorage.getItem('token') || '';
+
+    try {
+      // Fetch existing rating for the selected student
+      const response = await fetch('http://localhost:3001/getRating', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-access-token': token,
+        },
+        body: JSON.stringify({
+          groupId,
+          rateeId: student._id,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data.rating) {
+          // Set the ratings and feedback state with existing data
+          setRatings({
+            Cooperation: data.rating.CooperationRating || 0,
+            ConceptualContribution: data.rating.ConceptualContributionRating || 0,
+            PracticalContribution: data.rating.PracticalContributionRating || 0,
+            WorkEthic: data.rating.WorkEthicRating || 0,
+          });
+          setFeedback({
+            CooperationFeedback: data.rating.CooperationFeedback || '',
+            ConceptualContributionFeedback: data.rating.ConceptualContributionFeedback || '',
+            PracticalContributionFeedback: data.rating.PracticalContributionFeedback || '',
+            WorkEthicFeedback: data.rating.WorkEthicFeedback || '',
+          });
+        } else {
+          // No existing rating, reset to default
+          resetRatingsAndFeedback();
+        }
+      } else {
+        console.error('Failed to fetch existing rating');
+        resetRatingsAndFeedback();
+      }
+    } catch (error) {
+      console.error('Error fetching existing rating:', error);
+      resetRatingsAndFeedback();
+    }
     setShowModal(true);
   };
 
