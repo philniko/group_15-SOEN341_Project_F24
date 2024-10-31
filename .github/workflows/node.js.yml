@@ -1,0 +1,84 @@
+name: CI for Client and Server on Windows and macOS
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  client-windows:
+    name: Client Tests on Windows
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: |
+          cd client
+          npm install
+      - name: Run Tests
+        run: |
+          cd client
+          npm test
+
+  client-macos:
+    name: Client Tests on macOS
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: |
+          cd client
+          npm install
+      - name: Run Tests
+        run: |
+          cd client
+          npm test
+
+  server-windows:
+    name: Server Tests on Windows
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: |
+          cd server
+          npm install
+      - name: Run Tests
+        run: |
+          cd server
+          npm test
+
+  server-macos:
+    name: Server Tests on macOS
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Install Dependencies
+        run: |
+          cd server
+          npm install
+      - name: Run Tests
+        run: |
+          cd server
+          npm test
