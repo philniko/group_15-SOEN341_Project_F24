@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useUser } from '../hooks/UseUser'; //hook to get info about current user
 import './StudentDashboard.css';
 import './Navbar.css';
@@ -18,7 +18,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <h1 className="logo">
-        {user ? `${user.firstname}` : 'Welcome'} {/* Display first name if available */}
+        {user ? `${user.firstName}` : 'Welcome'} {/* Display first name if available */}
       </h1>
       <ul className={isMobile ? "nav-links-mobile" : "nav-links"} onClick={() => setIsMobile(false)}>
         {/* Use Link for proper internal routing */}
