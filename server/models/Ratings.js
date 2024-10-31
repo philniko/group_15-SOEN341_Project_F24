@@ -2,57 +2,63 @@ import mongoose from "mongoose";
 
 const RatingSchema = new mongoose.Schema({
 
-    rater:{
-        type: mongoose.Schema.Types.ObjectID,
-        ref:"User",
-        required: true
-    },
+  rater: {
+    type: mongoose.Schema.Types.ObjectID,
+    ref: "User",
+    required: true
+  },
 
-    ratee:{
-        type: mongoose.Schema.Types.ObjectID,
-        ref:"User",
-        required: true
-    },
+  ratee: {
+    type: mongoose.Schema.Types.ObjectID,
+    ref: "User",
+    required: true
+  },
 
-    CooperationRating: {
-        type: Number,
-        enum: [1,2,3,4,5],
-        required: true
-    },
+  group: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
+    required: true
+  },
 
-    CooperationFeedback:{
-        type: String,
-    },
+  CooperationRating: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true
+  },
 
-    ConceptualContributionRating:{
-        type: Number,
-        enum: [1,2,3,4,5],
-        required: true
-    },
+  CooperationFeedback: {
+    type: String,
+  },
 
-    ConceptualContributionFeedback:{
-        type: String,
-    },
+  ConceptualContributionRating: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true
+  },
 
-    PracticalContributionRating:{
-        type: Number,
-        enum: [1,2,3,4,5],
-        required: true
-    },
+  ConceptualContributionFeedback: {
+    type: String,
+  },
 
-    PracticalContributionFeedback:{
-        type: String
-    },
+  PracticalContributionRating: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true
+  },
 
-    WorkEthicRating:{
-        type: Number,
-        enum: [1,2,3,4,5],
-        required: true
-    },
+  PracticalContributionFeedback: {
+    type: String
+  },
 
-    WorkEthicFeedback:{
-        type: String
-    }
+  WorkEthicRating: {
+    type: Number,
+    enum: [1, 2, 3, 4, 5],
+    required: true
+  },
+
+  WorkEthicFeedback: {
+    type: String
+  }
 
 })
 
