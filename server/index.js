@@ -38,19 +38,19 @@ app.post("/register", (req, res) => {
 
   //making sure all fields are filled
   if (!firstName) {
-    return res.status(400).json({type: "firstName", message: "Please enter your first name!"});
+    return res.status(400).json({ type: "firstName", message: "Please enter your first name!" });
   }
   if (!lastName) {
-    return res.status(400).json({type: "lastName", message: "Please enter your last name!"});
+    return res.status(400).json({ type: "lastName", message: "Please enter your last name!" });
   }
   if (!email) {
-    return res.status(400).json({type: "email", message: "Please enter your email!"});
+    return res.status(400).json({ type: "email", message: "Please enter your email!" });
   }
   if (!password) {
-    return res.status(400).json({type: "password", message: "Please enter your password!"});
+    return res.status(400).json({ type: "password", message: "Please enter your password!" });
   }
   if (!role) {
-    return res.status(400).json({type: "role", message: "Please choose your role!"});
+    return res.status(400).json({ type: "role", message: "Please choose your role!" });
   }
 
   //checking to see if the user already exists
@@ -59,7 +59,7 @@ app.post("/register", (req, res) => {
       email: email
     }).then((user) => {
       if (user) {
-        return res.status(409).json({type: "email", message: "The email has already been taken!"});
+        return res.status(409).json({ type: "email", message: "The email has already been taken!" });
       } else {
         //create new user, password is hashed in UserSchema.js
         const newUser = new UserModel({
@@ -77,7 +77,7 @@ app.post("/register", (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({type: "server", message: "Server Registration Error"});
+    res.status(500).json({ type: "server", message: "Server Registration Error" });
   }
 });
 
@@ -85,7 +85,7 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
-      res.status(404).json({type: "general", message: "Incorrect email or password!"});
+      res.status(404).json({ type: "general", message: "Incorrect email or password!" });
     } else {
       const validPassword = bcrypt.compareSync(
         req.body.password,
@@ -98,7 +98,7 @@ app.post("/login", (req, res) => {
         });
         res.status(200).json({ role: user.role, token: token });
       } else {
-        res.status(401).json({type: "general", message: "Incorrect email or password!"});
+        res.status(401).json({ type: "general", message: "Incorrect email or password!" });
       }
     }
   });
@@ -118,23 +118,56 @@ app.post("/getGroups", verifyJWT, (req, res) => {
     })
     .then((user) => {
       if (!user) {
-        return res.status(400).json({type: "error", message: "User not found"});
+        return res.status(400).json({ type: "error", message: "User not found" });
       }
       return res.status(200).json({ groups: user.groups });
     })
-    .catch(() => res.status(500).json({type: "error", message: "Server error"}));
+    .catch(() => res.status(500).json({ type: "error", message: "Server error" }));
 });
 
-app.post("/getGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
-  let { id } = req.body;
-  GroupModel.findById(id)
-    .populate({ path: "students" })
-    .then((group) => res.status(200).json({ group: group }))
-    .catch((err) => res.status(500).json(err));
+
+app.post("/getGroup", verifyJWT, async (req, res) => {
+  const userId = req.user.id; // Extract user ID from JWT
+  const { id } = req.body; // Group ID
+
+  try {
+    // Fetch the group and populate students and ratings given by the current user
+    const group = await GroupModel.findById(id)
+      .populate("students")
+      .populate({
+        path: "ratings",
+        match: { rater: userId }, // Only ratings given by the current user
+        select: "ratee", // Only select the ratee field
+      });
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Create a set of rateeIds that the current user has rated
+    const ratedStudentIds = new Set(group.ratings.map((rating) => rating.ratee.toString()));
+
+    // Add 'rated' property to each student
+    const studentsWithRatedStatus = group.students.map((student) => ({
+      ...student.toObject(),
+      rated: ratedStudentIds.has(student._id.toString()),
+    }));
+
+    res.status(200).json({
+      group: {
+        ...group.toObject(),
+        students: studentsWithRatedStatus,
+      },
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
 });
+
 
 app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
-  let {user} = req.user;
+  let { user } = req.user;
   if (!user.groups || user.groups.length === 0) {
     return res.status(400).json({ error: "User does not belong to any group" });
   }
@@ -142,14 +175,14 @@ app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: S
   const groupId = user.groups[0]; // Assuming user belongs to one group, use the first group ID
 
   GroupModel.findById(groupId)
-      .populate("students") // populating students in the group
-      .then((group) => {
-        if (!group) {
-          return res.status(404).json({ error: "Group not found" });
-        }
-        return res.status(200).json({ group });
-      })
-      .catch((err) => res.status(500).json({ error: err.message }));
+    .populate("students") // populating students in the group
+    .then((group) => {
+      if (!group) {
+        return res.status(404).json({ error: "Group not found" });
+      }
+      return res.status(200).json({ group });
+    })
+    .catch((err) => res.status(500).json({ error: err.message }));
 });
 
 //handling group creation
@@ -192,25 +225,25 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
   const { groupId, userEmail } = req.body;
 
   if (!groupId) {
-    res.status(400).json({type: "error", message: "Missing group id!"});
+    res.status(400).json({ type: "error", message: "Missing group id!" });
   }
   else if (!userEmail) {
-    res.status(400).json({type: "error", message: "Missing student email!"});
+    res.status(400).json({ type: "error", message: "Missing student email!" });
   }
   else {
     UserModel.findOne({ email: userEmail })
       .then((user) => {
         if (!user) {
-          res.status(400).json({type: "error", message: "User does not exit!"});
+          res.status(400).json({ type: "error", message: "User does not exit!" });
         }
         else if (user.role != "student") {
-          res.status(400).json({type: "error", message: "User is not a student!"});
+          res.status(400).json({ type: "error", message: "User is not a student!" });
         }
         else {
           GroupModel.findById(groupId)
             .then((group) => {
               if (!group) {
-                res.status(400).json({type: "error", message: "Group does not exist!"});
+                res.status(400).json({ type: "error", message: "Group does not exist!" });
               }
               else {
                 let valid = true;
@@ -223,7 +256,7 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
                 }
 
                 if (!valid) {
-                  res.status(400).json({type: "error", message: "User is already a member of the group!"});
+                  res.status(400).json({ type: "error", message: "User is already a member of the group!" });
                 }
                 else {
                   //updating student groups and group students arrays
@@ -244,73 +277,100 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
   }
 });
 
+
 app.post('/saveRating', verifyJWT, async (req, res) => {
-  const { rateeId, Cooperation, ConceptualContribution, PracticalContribution, WorkEthic, CooperationFeedback, ConceptualContributionFeedback, PracticalContributionFeedback, WorkEthicFeedback } = req.body;
+  const {
+    rateeId,
+    Cooperation,
+    ConceptualContribution,
+    PracticalContribution,
+    WorkEthic,
+    CooperationFeedback,
+    ConceptualContributionFeedback,
+    PracticalContributionFeedback,
+    WorkEthicFeedback,
+  } = req.body;
+
   const userId = req.user.id;
   const groupId = req.body.groupId;
-  let existingRating;
+
   try {
     // Check if the group exists
-    GroupModel.findById(groupId).populate('ratings')
-        .then((group) => {
-          console.log(typeof(userId));
-          if (!group) {
-            return res.status(404).json({ message: 'Group not found' });
-          }
-          const raterObjectID = new mongoose.Types.ObjectId(userId);
-          const rateeObjectID = new mongoose.Types.ObjectId(rateeId);
+    const group = await GroupModel.findById(groupId).populate('ratings');
 
-          let Rating = group.ratings
-          console.log(Rating[0]);
-          if (Rating.length > 0) {
-            for (let i = 0; i < group.ratings.length; i++) {
-              if (Rating[i].ratee.equals(rateeObjectID) && Rating[i].rater.equals(raterObjectID)) {
-                existingRating = Rating[i];
-                break;
-              }
-            }
-          }
-          if (existingRating){
-            existingRating.CooperationRating = Cooperation;
-            existingRating.CooperationFeedback = CooperationFeedback;
-            existingRating.ConceptualContributionRating = ConceptualContribution;
-            existingRating.ConceptualContributionFeedback = ConceptualContributionFeedback;
-            existingRating.PracticalContributionRating = PracticalContribution;
-            existingRating.PracticalContributionFeedback = PracticalContributionFeedback;
-            existingRating.WorkEthicRating = WorkEthic;
-            existingRating.WorkEthicFeedback = WorkEthicFeedback;
-            existingRating.save();
-          }
-          else {
-            // Create a new rating
-            const newRating ={
-              rater: raterObjectID,
-              ratee: rateeObjectID,
-              CooperationRating: Cooperation,
-              CooperationFeedback: CooperationFeedback,
-              ConceptualContributionRating: ConceptualContribution,
-              ConceptualContributionFeedback: ConceptualContributionFeedback,
-              PracticalContributionRating: PracticalContribution,
-              PracticalContributionFeedback: PracticalContributionFeedback,
-              WorkEthicRating: WorkEthic,
-              WorkEthicFeedback: WorkEthicFeedback,
-            };
-            console.log(raterObjectID);
-            console.log(typeof(newRating.WorkEthic));
-            console.log(typeof(newRating.WorkEthicFeedback));
-            RatingModel.create(newRating)
-                .then((createdRating) =>{
-                  group.ratings.push(createdRating._id)
-                  return group.save();
-                })
-                .then(()=> {
-                  console.log("Before Save")
-                  res.status(200).json({message: "Successful save"});
-                  console.log("After Save")
-                })
-                .catch((err) => res.status(400).json(err));
-          }
-        })
+    if (!group) {
+      return res.status(404).json({ message: 'Group not found' });
+    }
+
+    const raterObjectID = new mongoose.Types.ObjectId(userId);
+    const rateeObjectID = new mongoose.Types.ObjectId(rateeId);
+
+    // Check if the rating already exists
+    let existingRating = await RatingModel.findOne({
+      rater: raterObjectID,
+      ratee: rateeObjectID,
+      group: groupId,
+    });
+
+    if (existingRating) {
+      // Update existing rating
+      existingRating.CooperationRating = Cooperation;
+      existingRating.CooperationFeedback = CooperationFeedback;
+      existingRating.ConceptualContributionRating = ConceptualContribution;
+      existingRating.ConceptualContributionFeedback = ConceptualContributionFeedback;
+      existingRating.PracticalContributionRating = PracticalContribution;
+      existingRating.PracticalContributionFeedback = PracticalContributionFeedback;
+      existingRating.WorkEthicRating = WorkEthic;
+      existingRating.WorkEthicFeedback = WorkEthicFeedback;
+
+      await existingRating.save();
+    } else {
+      // Create a new rating
+      const newRating = new RatingModel({
+        rater: raterObjectID,
+        ratee: rateeObjectID,
+        group: groupId,
+        CooperationRating: Cooperation,
+        CooperationFeedback: CooperationFeedback,
+        ConceptualContributionRating: ConceptualContribution,
+        ConceptualContributionFeedback: ConceptualContributionFeedback,
+        PracticalContributionRating: PracticalContribution,
+        PracticalContributionFeedback: PracticalContributionFeedback,
+        WorkEthicRating: WorkEthic,
+        WorkEthicFeedback: WorkEthicFeedback,
+      });
+
+      await newRating.save();
+
+      // Add the rating to the group's ratings array
+      group.ratings.push(newRating._id);
+      await group.save();
+    }
+
+    res.status(200).json({ message: 'Successful save' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+
+app.post('/getRating', verifyJWT, async (req, res) => {
+  const userId = req.user.id; // Rater ID (current user)
+  const { groupId, rateeId } = req.body;
+
+  try {
+    const rating = await RatingModel.findOne({
+      rater: userId,
+      ratee: rateeId,
+      group: groupId,
+    });
+
+    if (rating) {
+      res.status(200).json({ rating });
+    } else {
+      res.status(200).json({ rating: null });
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
