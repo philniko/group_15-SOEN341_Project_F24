@@ -39,6 +39,3 @@ jobs:
         run: |
           npm start &
       
-      # Run tests (if you have them)
-      - name: Run Tests
-        run: echo "No tests specified yet"
