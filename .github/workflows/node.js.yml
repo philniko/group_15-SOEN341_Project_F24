@@ -1,0 +1,41 @@
+name: CI for Client and Server
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  run-tests:
+    runs-on: windows-latest  # You can also use 'windows-latest' or 'macos-latest' if needed
+
+    steps:
+      - uses: actions/checkout@v3
+
+      # Set up Node.js for both client and server
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # Install and run the client
+      - name: Install Client Dependencies
+        working-directory: client
+        run: npm install
+      
+      - name: Start Client in Background
+        working-directory: client
+        run: |
+          npm run dev &
+      
+      # Install and run the server
+      - name: Install Server Dependencies
+        working-directory: server
+        run: npm install
+
+      - name: Start Server in Background
+        working-directory: server
+        run: |
+          npm start &
+      
