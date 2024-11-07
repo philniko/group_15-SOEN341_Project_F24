@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
+import { jwtDecode } from 'jwt-decode';
 
 // Define a Student interface
 interface Student {
@@ -10,6 +11,10 @@ interface Student {
   email: string;
   rated?: boolean; // Optional property to track if rated
 }
+
+// Decode the token to get the current user's ID
+const token = localStorage.getItem("token");
+const currentUserId = token ? (jwtDecode(token)).id : null;
 
 function StudentGroup() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -180,8 +185,6 @@ function StudentGroup() {
           ))}
         </tbody>
       </table>
-
-
       {/* Modal for rating */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
