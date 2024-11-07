@@ -126,6 +126,7 @@ span {
     text-align: center;
   }
   
+  
   /* Close button in the top-right corner */
   .modal-close {
     position: absolute;
@@ -139,6 +140,7 @@ span {
     color: #333;
   }
   
+  
   /* Button styling */
   .btn-danger {
     background-color: #d9534f;
@@ -148,4 +150,31 @@ span {
     cursor: pointer;
     border-radius: 4px;
   }
+
+  .card-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 2.0rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+  }
+
+  
+  /* X button in the top-right corner of each card */
+.card-close:hover {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 2.0rem;
+    font-weight: bold;
+    color: #d9534f;
+    cursor: pointer;
+  }
+
   
