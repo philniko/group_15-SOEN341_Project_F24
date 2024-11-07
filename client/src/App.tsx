@@ -11,6 +11,7 @@ import './StudentDashboard/StudentDashboard.css'
 
 import HomeInstructor from './InstructorDashboard/Home.tsx'
 import Group from "./InstructorDashboard/Group.tsx"
+import SummaryView from './InstructorDashboard/SummaryView.tsx'
 import NavbarInstructor from './InstructorDashboard/Navbar.tsx'
 import './InstructorDashboard/InstructorDashboard.css'
 
@@ -57,6 +58,7 @@ function App() {
       <NavbarInstructor />
       <Routes>
         <Route path="/home" element={<HomeInstructor />} />
+        <Route path="/SummaryView" element={<SummaryView/>}></Route>
         <Route path="group/:id" element={<Group />}></Route>
       </Routes>
     </>

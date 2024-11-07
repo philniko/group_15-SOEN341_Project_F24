@@ -24,6 +24,7 @@ const Navbar = () => {
       <ul className={isMobile ? "nav-links-mobile" : "nav-links"} onClick={() => setIsMobile(false)}>
         {/* Use the Link component for navigation */}
         <li><Link to="/instructor/Home">Home</Link></li>
+        <li><Link to="/instructor/SummaryView">Summary of Results</Link></li>
         <li><a href="" onClick={handleLogout}>Logout</a></li>
       </ul>
       <button className="mobile-menu-icon" onClick={() => setIsMobile(!isMobile)}>

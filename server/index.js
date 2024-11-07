@@ -448,6 +448,63 @@ app.post('/getRating', verifyJWT, async (req, res) => {
   }
 });
 
+app.get('/getSummaryView', verifyJWT, async(req,res) => {
+  try {
+    const groups = await GroupModel.find()
+        .populate({
+          path: 'students',
+          select: 'email firstName lastName', // Get basic student info
+        })
+        .populate({
+          path: 'ratings',
+          populate: { path: 'ratee', select: '_id' }, // Populate ratee for rating calculations
+        });
+
+    const studentSummaries = groups.flatMap((group) => {
+      return group.students.map((student) => {
+        // Filter ratings where this student is the ratee
+        const studentRatings = group.ratings.filter(
+            (rating) => rating.ratee.equals(student._id)
+        );
+
+        // Calculate averages and peer count
+        const avgCooperation = studentRatings.length
+            ? studentRatings.reduce((acc, r) => acc + r.CooperationRating, 0) / studentRatings.length
+            : 0;
+        const avgConceptualContribution = studentRatings.length
+            ? studentRatings.reduce((acc, r) => acc + r.ConceptualContributionRating, 0) / studentRatings.length
+            : 0;
+        const avgPracticalContribution = studentRatings.length
+            ? studentRatings.reduce((acc, r) => acc + r.PracticalContributionRating, 0) / studentRatings.length
+            : 0;
+        const avgWorkEthic = studentRatings.length
+            ? studentRatings.reduce((acc, r) => acc + r.WorkEthicRating, 0) / studentRatings.length
+            : 0;
+        const overallAverage = (avgCooperation + avgConceptualContribution + avgPracticalContribution + avgWorkEthic) / 4;
+        const peersResponded = studentRatings.length;
+
+        return {
+          email: student.email,
+          firstName: student.firstName,
+          lastName: student.lastName,
+          team: group.name,
+          teamId: group._id,
+          avgCooperation: avgCooperation,
+          avgConceptualContribution: avgConceptualContribution,
+          avgPracticalContribution: avgPracticalContribution,
+          avgWorkEthic: avgWorkEthic,
+          overallAverage: overallAverage,
+          peersResponded: peersResponded,
+        };
+      });
+    });
+    res.status(200).json(studentSummaries);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Error fetching student ratings summary' });
+  }
+});
+
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });
