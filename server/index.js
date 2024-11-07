@@ -218,7 +218,42 @@ app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: Strin
     })
     .catch((err) => res.status(500).json(err));
 });
+// handling group removal
+app.post("/removeGroup", verifyJWT, async (req, res) => {
+  const userId = req.user.id; // Extract user ID from JWT
+  const { groupId } = req.body; // Extract group ID from the request body
 
+  try {
+    // Find the group by its ID
+    const group = await GroupModel.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Ensure that the requesting user is the instructor of the group
+    if (group.instructor.toString() !== userId) {
+      return res.status(403).json({ message: "Only the instructor can delete this group" });
+    }
+
+    // Remove the group reference from all students in the group's `students` array
+    await UserModel.updateMany(
+      { _id: { $in: group.students } },  // Find all users in this group
+      { $pull: { groups: groupId } }     // Remove the group reference
+    );
+
+    // Optional: Remove all associated ratings for this group
+    await RatingModel.deleteMany({ _id: { $in: group.ratings } });
+
+    // Manually delete the group document
+    await GroupModel.deleteOne({ _id: groupId });
+
+    res.status(200).json({ message: "Group successfully removed" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 //handling student addition
 app.post("/addStudent", (req, res) => { //request format: {groupId: String, userEmail: String}
 
