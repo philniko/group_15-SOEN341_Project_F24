@@ -33,6 +33,43 @@ function StudentGroup() {
     PracticalContributionFeedback: "",
     WorkEthicFeedback: ""
   });
+  const [existGrade, setExistGrade] = useState(false);
+  const [totalGrade, setTotalGrade] = useState(-1);
+  const [cooperationGrade, setCooperationGrade] = useState(-1);
+  const [conceptualGrade, setConceptualGrade] = useState(-1);
+  const [practicalGrade, setPracticalGrade] = useState(-1);
+  const [workEthicGrade, setWorkEthicGrade] = useState(-1);
+
+  function fetchGrade() {
+    const getGrade = async () => {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:3001/getGrade", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token
+        },
+        body: JSON.stringify({groupId: groupId})
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTotalGrade(data.totalGrade);
+        setCooperationGrade(data.cooperationGrade);
+        setConceptualGrade(data.conceptualGrade);
+        setPracticalGrade(data.practicalGrade);
+        setWorkEthicGrade(data.workEthicGrade);
+        setExistGrade(true);
+      }
+    }
+    
+    getGrade();
+  }
+
+  useEffect(() => {
+    fetchGrade();
+  }, []);
 
   const fetchGroupData = async () => {
     const token = localStorage.getItem('token') || '';
@@ -159,6 +196,18 @@ function StudentGroup() {
 
   return (
     <div className="home">
+      {existGrade ? <div>
+        <div>Total Grade: {totalGrade}/5</div>
+        <div>Cooperation: {cooperationGrade}/5</div>
+        <div>Conceptual Contribution: {conceptualGrade}/5</div>
+        <div>Practical Contribution: {practicalGrade}/5</div>
+        <div>Work Ethic: {workEthicGrade}/5</div>
+      </div>
+      : 
+      <div>
+        Not Graded Yet
+      </div>
+      }
       <table className="table">
         <thead>
           <tr>
