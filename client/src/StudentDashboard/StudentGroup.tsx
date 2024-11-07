@@ -175,26 +175,21 @@ function StudentGroup() {
               <td>{student.lastName}</td>
               <td>{student.email}</td>
               <td>
-                {student._id !== currentUserId && (
-                  <button
-                    onClick={() => handleRateStudent(student)}
-                    className={student.rated ? "btn-rated" : "btn-not-rated"}
-                  >
-                    {student.rated ? "Change Rating" : "Not Rated Yet"}
-                  </button>
-                )}
+                <button onClick={() => handleRateStudent(student)}
+                  className={student.rated ? 'btn-rated' : 'btn-not-rated'}
+                >
+                  {student.rated ? 'Change Rating' : 'Not Rated Yet'}
+                </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-
-
       {/* Modal for rating */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Rate {selectedStudent?.firstName} {selectedStudent?.lastName} {selectedStudent?.email}
+            Rate {selectedStudent?.firstName} {selectedStudent?.lastName}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -265,27 +260,28 @@ function StudentGroup() {
                 })}
               />
             </div>
+            <div>
+              <strong>Work Ethic</strong>
+              {[1, 2, 3, 4, 5].map(value => (
+                <label key={value}>
+                  <input
+                    type="radio"
+                    name="Work Ethic"
+                    value={value}
+                    checked={ratings.WorkEthic === value}
+                    onChange={() => handleRatingChange('WorkEthic', value)}
+                  />
+                  {value}
+                </label>
+              ))}
+              <textarea
+                placeholder="Optional feedback"
+                value={feedback.WorkEthicFeedback}
+                onChange={(e) => setFeedback({ ...feedback, WorkEthicFeedback: e.target.value })}
+              />
+            </div>
           </div>
-          <div>
-            <strong>Work Ethic</strong>
-            {[1, 2, 3, 4, 5].map(value => (
-              <label key={value}>
-                <input
-                  type="radio"
-                  name="Work Ethic"
-                  value={value}
-                  checked={ratings.WorkEthic === value}
-                  onChange={() => handleRatingChange('WorkEthic', value)}
-                />
-                {value}
-              </label>
-            ))}
-            <textarea
-              placeholder="Optional feedback"
-              value={feedback.WorkEthicFeedback}
-              onChange={(e) => setFeedback({ ...feedback, WorkEthicFeedback: e.target.value })}
-            />
-          </div>
+
         </Modal.Body>
         <Modal.Footer>
           <Button variant="secondary" onClick={() => setShowModal(false)}>
