@@ -88,7 +88,205 @@ span {
     font-size: medium;
 }
 
-.card:hover {
-    background-color: aliceblue;
+.card {
+    position: relative;
+    transition: background 0.3s, transform 0.3s, box-shadow 0.3s;
     cursor: pointer;
+    border-radius: 12px;
+    overflow: hidden;
+    background-color: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    padding: 16px;
 }
+
+.card:hover {
+    background-color: #f0f8ff;
+    transform: scale(1.03);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    border-color: transparent;
+}
+
+.card-body {
+    padding: 20px;
+}
+
+.card-body h5 {
+    font-weight: bold;
+    color: #333;
+    font-size: 1.2rem;
+    transition: color 0.3s;
+    text-decoration: underline;
+}
+
+.card-body p {
+    color: #666;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-top: 10px;
+}
+
+/* For the groups page */
+.table {
+    width: 95%;
+    border-collapse: separate;
+    border-spacing: 0 8px;
+    font-family: 'Arial', sans-serif;
+    margin-top: 20px;
+    background-color: #f5f7fa;
+    margin: 0 auto;
+}
+
+.table thead th {
+    background-color: #2c3e50;
+    color: #ffffff;
+    padding: 12px;
+    font-weight: bold;
+    text-align: left;
+    border-radius: 15px 15px 0 0;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+.table tbody tr {
+    background-color: #ffffff;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+}
+
+.table tbody tr:hover {
+    transform: translateY(-1px);
+    box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.1);
+}
+
+.table tbody td {
+    padding: 12px 16px;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    border-top: 1px solid #e0e4e8;
+    border-bottom: 1px solid #e0e4e8;
+    border-left: 1px solid #e0e4e8;
+    border-right: 1px solid #e0e4e8;
+}
+
+.table tbody td button {
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    color: #ffffff;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s;
+}
+
+.table tbody td button:hover {
+    transform: scale(1.05);
+}
+
+/* For the evaluation */
+.rating-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-family: 'Arial', sans-serif;
+    background-color: #f4f6f8;
+    padding: 20px;
+    border-radius: 6px;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+    justify-content: space-between;
+}
+
+.rating-section > div {
+    flex: 1 1 300px;
+    background-color: #ffffff;
+    border-radius: 6px;
+    padding: 20px;
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease-in-out;
+}
+
+.rating-section strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.rating-section label {
+    display: inline-flex;
+    align-items: center;
+    font-size: 1rem;
+    color: #444;
+    margin-right: 10px;
+    cursor: pointer;
+    margin-bottom: 8px;
+}
+
+.rating-section input[type="radio"] {
+    margin-right: 8px;
+    accent-color: #1a83ff;
+    transform: scale(1.2);
+}
+
+.rating-section textarea {
+    width: 100%;
+    margin-top: 12px;
+    padding: 12px;
+    font-size: 1rem;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    resize: vertical;
+    transition: border-color 0.2s ease;
+}
+
+.rating-section textarea:focus {
+    border-color: #1a83ff;
+    outline: none;
+    box-shadow: 0 0 3px rgba(26, 131, 255, 0.15);
+}
+
+.rating-section label:hover {
+    color: #1a83ff;
+}
+
+.rating-section input[type="radio"]:checked + label {
+    color: #1a83ff;
+    font-weight: bold;
+}
+
+.rating-section input[type="radio"]:focus + label {
+    color: #1a83ff;
+    outline: 2px solid #1a83ff;
+}
+
+/* For rated / nonrated buttons */
+.btn-rated {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-rated:hover {
+    background-color: #218838;
+  }
+  
+  .btn-not-rated {
+    background-color: #ff1a1a;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .btn-not-rated:hover {
+    background-color: #ff1a1a;
+  }
