@@ -158,8 +158,10 @@ function Group() {
               &times;
             </button>
             <h5>Confirm Removal</h5>
-            <p>Are you sure you want to remove this student from the group?</p>
-            <p><b>All ratings made by and given to this student will be lost</b></p>
+            <p>
+              Are you sure you want to remove this student from the group?
+              All ratings made by and given to this student will be lost!
+            </p>
             <button onClick={removeStudent} className="btn btn-danger">Confirm</button>
           </div>
         </div>
