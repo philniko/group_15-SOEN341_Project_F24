@@ -9,6 +9,10 @@ function Home() {
   const [messageType, setMessageType] = useState("");
   const [message, setMessage] = useState("");
 
+  // State for handling the confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [groupToDelete, setGroupToDelete] = useState<string | null>(null);
+
   const createGroup = async () => {
 
     if (groupName === "") {
@@ -63,6 +67,46 @@ function Home() {
     updateGroups();
   }, []);
 
+  // Function to delete a group
+  const deleteGroup = async () => {
+    if (!groupToDelete) return; // No group selected for deletion
+
+    const token = localStorage.getItem('token') || "";
+    const response = await fetch("http://localhost:3001/removeGroup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": token
+      },
+      body: JSON.stringify({ groupId: groupToDelete })
+    });
+
+    if (response.ok) {
+      setGroups(groups.filter(group => group._id !== groupToDelete));
+      setMessageType("success");
+      setMessage("Group deleted successfully");
+    } else {
+      const data = await response.json();
+      setMessageType("error");
+      setMessage(data.message || "An error occurred while deleting the group");
+    }
+    
+    // Close modal and reset state
+    setShowConfirmModal(false);
+    setGroupToDelete(null);
+  }
+
+  useEffect(() => {
+    updateGroups();
+  }, []);
+
+  // Function to handle delete confirmation
+  const confirmDeleteGroup = (groupId: string, event: React.MouseEvent) => {
+    event.stopPropagation(); // Prevent card click
+    setGroupToDelete(groupId); // Set the group to be deleted
+    setShowConfirmModal(true); // Show the confirmation modal
+  };
+
   return (
     <div className="home">
       <div className="container">
@@ -91,12 +135,35 @@ function Home() {
                   <p className="card-text">
                     Number of Students: {group.students.length}
                   </p>
+                  {/* Delete Group Button */}
+                  <button
+                    onClick={(event) => confirmDeleteGroup(group._id, event)} // Show confirmation modal
+                    className="btn btn-danger"
+                  >
+                    Delete Group
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
+      {/* Confirmation Modal for Group Deletion */}
+      {showConfirmModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button
+              onClick={() => setShowConfirmModal(false)}
+              className="modal-close"
+            >
+              &times;
+            </button>
+            <h5>Confirm Deletion</h5>
+            <p>Are you sure you want to delete this group? This action cannot be undone.</p>
+            <button onClick={deleteGroup} className="btn btn-danger">Confirm</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
