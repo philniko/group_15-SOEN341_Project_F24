@@ -9,6 +9,11 @@ function Group() {
   const [messageType, setMessageType] = useState("");
   const [message, setMessage] = useState("");
 
+  // State for handling the confirmation modal
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
+  
+
   const updateStudents = async () => {
     const token = localStorage.getItem('token') || "";
     const response = await fetch("http://localhost:3001/getGroup", {
@@ -69,6 +74,38 @@ function Group() {
     updateStudents();
   }, []);
 
+  // Function to remove a student from the group
+  const removeStudent = async (studentId: string) => {
+    const token = localStorage.getItem("token") || "";
+    const response = await fetch("http://localhost:3001/removeStudent", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-access-token": token
+      },
+      body: JSON.stringify({ groupId: id, studentId })
+    });
+
+    if (response.ok) {
+      setMessageType("success");
+      setMessage("Student removed successfully!");
+      updateStudents(); // Refresh the student list
+    } else {
+      const data = await response.json();
+      setMessageType("error");
+      setMessage(data.message || "An error occurred while removing the student.");
+    }
+  }
+
+  useEffect(() => {
+    updateStudents();
+  }, []);
+  
+  const confirmRemoveStudent = (studentId: string) => {
+    setStudentToDelete(studentId); // Set the student to be removed
+    setShowConfirmModal(true);     // Show the confirmation modal
+  };
+
   return (
     <div className="home">
       <div className="container">
@@ -97,12 +134,36 @@ function Group() {
                   <p className="card-text">
                     Overall Grade: {"TODO" /*TODO*/}
                   </p>
+                  {/* Remove Student Button */}
+                  <button
+                    onClick={() => confirmRemoveStudent(student._id)}
+                    className="btn btn-danger"
+                  >
+                    Remove Student
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
       </div>
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <button
+              onClick={() => setShowConfirmModal(false)}
+              className="modal-close"
+            >
+              &times;
+            </button>
+            <h5>Confirm Removal</h5>
+            <p>Are you sure you want to remove this student from the group?</p>
+            <p><b>All ratings made by and given to this student will be lost</b></p>
+            <button onClick={removeStudent} className="btn btn-danger">Confirm</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
