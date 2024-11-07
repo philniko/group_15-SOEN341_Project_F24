@@ -277,6 +277,42 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
   }
 });
 
+// handling student removal from group
+app.post("/removeStudent", verifyJWT, async (req, res) => {
+  const { groupId, studentId } = req.body;
+
+  try {
+    // Find the group by ID
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Find the student by ID and ensure they exist
+    const student = await UserModel.findById(studentId);
+    if (!student) {
+      return res.status(404).json({ message: "Student not found" });
+    }
+
+    // Check if the student is part of the group
+    if (!group.students.includes(studentId)) {
+      return res.status(400).json({ message: "Student is not a member of this group" });
+    }
+
+    // Remove the student from the group's students array
+    group.students = group.students.filter(id => id.toString() !== studentId);
+    await group.save();
+
+    // Remove the group from the student's groups array
+    student.groups = student.groups.filter(id => id.toString() !== groupId);
+    await student.save();
+
+    res.status(200).json({ message: "Student removed from group successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 app.post('/saveRating', verifyJWT, async (req, res) => {
   const {
