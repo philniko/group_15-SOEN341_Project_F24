@@ -129,18 +129,21 @@ function Group() {
           {students.map((student) =>
             <div key={String(student._id)} className="col-12 mb-3">
               <div className="card">
+                {/* X button to delete the group */}
+                <button
+                  className="card-close"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    confirmRemoveStudent(student._id);
+                  }}
+                >
+                  &times;
+                </button>
                 <div className="card-body">
                   <h5 className="card-title">{student.firstName + " " + student.lastName}</h5>
                   <p className="card-text">
                     Overall Grade: {"TODO" /*TODO*/}
                   </p>
-                  {/* Remove Student Button */}
-                  <button
-                    onClick={() => confirmRemoveStudent(student._id)}
-                    className="btn btn-danger"
-                  >
-                    Remove Student
-                  </button>
                 </div>
               </div>
             </div>
