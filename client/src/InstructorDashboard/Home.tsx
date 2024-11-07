@@ -148,14 +148,19 @@ function Home() {
           )}
         </div>
       </div>
-      {/* Confirmation Modal */}
+      {/* Confirmation Modal for Group Deletion */}
       {showConfirmModal && (
         <div className="modal-overlay">
           <div className="modal-content">
+            <button
+              onClick={() => setShowConfirmModal(false)}
+              className="modal-close"
+            >
+              &times;
+            </button>
             <h5>Confirm Deletion</h5>
             <p>Are you sure you want to delete this group? This action cannot be undone.</p>
             <button onClick={deleteGroup} className="btn btn-danger">Confirm</button>
-            <button onClick={() => setShowConfirmModal(false)} className="btn btn-secondary ms-2">Cancel</button>
           </div>
         </div>
       )}
