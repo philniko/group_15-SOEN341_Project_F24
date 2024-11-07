@@ -130,18 +130,21 @@ function Home() {
           {groups.map((group) =>
             <div key={String(group._id)} className="col-12 mb-3">
               <div className="card" onClick={() => navigate("/instructor/group/" + group._id)}>
+                {/* X button to delete the group */}
+                <button
+                  className="card-close"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    confirmDeleteGroup(group._id,event);
+                  }}
+                >
+                  &times;
+                </button>
                 <div className="card-body">
                   <h5 className="card-title">{group.name}</h5>
                   <p className="card-text">
                     Number of Students: {group.students.length}
                   </p>
-                  {/* Delete Group Button */}
-                  <button
-                    onClick={(event) => confirmDeleteGroup(group._id, event)} // Show confirmation modal
-                    className="btn btn-danger"
-                  >
-                    Delete Group
-                  </button>
                 </div>
               </div>
             </div>
