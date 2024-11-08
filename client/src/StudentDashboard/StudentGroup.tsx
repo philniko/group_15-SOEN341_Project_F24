@@ -18,6 +18,7 @@ const currentUserId = token ? (jwtDecode(token)).id : null;
 
 function StudentGroup() {
   const { groupId } = useParams<{ groupId: string }>();
+  const [groupName, setGroupName] = useState<string>(""); // New state for group name
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showModal, setShowModal] = useState(false);
@@ -48,6 +49,7 @@ function StudentGroup() {
     if (response.ok) {
       const data = await response.json();
       setStudents(data.group.students || []);
+      setGroupName(data.group.name); // Assuming `name` is returned in the response
     }
   };
 
@@ -159,6 +161,7 @@ function StudentGroup() {
 
   return (
     <div className="home">
+      <h1>{groupName}</h1>
       <table className="table">
         <thead>
           <tr>
