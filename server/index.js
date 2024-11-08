@@ -505,6 +505,46 @@ app.get('/getSummaryView', verifyJWT, async(req,res) => {
   }
 });
 
+app.post("/getGrade", verifyJWT, (req, res) => {
+  const userId = req.user.id;
+  const groupId = req.body.groupId;
+
+  GroupModel.findById(groupId).populate({path: "ratings"}).then((group) => {
+    let numberOfRatings = 0;
+    let cooperationTotal = 0;
+    let conceptualTotal = 0;
+    let practicalTotal = 0;
+    let workEthicTotal = 0;
+
+    for (let i = 0; i < group.ratings.length; i++) {
+      if (group.ratings[i].ratee._id.equals(userId)) {
+        numberOfRatings += 1;
+        cooperationTotal += group.ratings[i].CooperationRating;
+        conceptualTotal += group.ratings[i].ConceptualContributionRating;
+        practicalTotal += group.ratings[i].PracticalContributionRating;
+        workEthicTotal += group.ratings[i].WorkEthicRating;
+      }
+    }
+
+    if (numberOfRatings == 0) {
+      res.status(300).json({
+        message: "No ratings"
+      });
+    }
+    else {
+      res.status(200).json({
+        totalGrade: (cooperationTotal + conceptualTotal + practicalTotal + workEthicTotal) / (4 * numberOfRatings),
+        cooperationGrade: cooperationTotal / numberOfRatings,
+        conceptualGrade: conceptualTotal / numberOfRatings,
+        practicalGrade: practicalTotal / numberOfRatings,
+        workEthicGrade: workEthicTotal / numberOfRatings
+      });
+    }
+  }).catch((err) => {
+    res.status(500).json(err);
+  });
+});
+
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });
