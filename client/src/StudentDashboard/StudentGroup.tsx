@@ -19,8 +19,10 @@ const currentUserId = token ? (jwtDecode(token)).id : null;
 function StudentGroup() {
   const { groupId } = useParams<{ groupId: string }>();
   const [students, setStudents] = useState<Student[]>([]);
+  const [groupName, setGroupName] = useState<string>(""); // New state for group name
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [ratings, setRatings] = useState({
     Cooperation: 0,
     ConceptualContribution: 0,
@@ -40,6 +42,16 @@ function StudentGroup() {
   const [practicalGrade, setPracticalGrade] = useState(-1);
   const [workEthicGrade, setWorkEthicGrade] = useState(-1);
 
+  // Update currentUserId whenever the token changes
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const decoded = token ? jwtDecode<{ id: string }>(token) : null;
+    setCurrentUserId(decoded ? decoded.id : null);
+  }, [localStorage.getItem("token")]); // Ensures re-running when token changes
+
+  useEffect(() => {
+  }, [groupId]);
+
   function fetchGrade() {
     const getGrade = async () => {
       const token = localStorage.getItem("token");
@@ -50,7 +62,7 @@ function StudentGroup() {
           "Content-Type": "application/json",
           "x-access-token": token
         },
-        body: JSON.stringify({groupId: groupId})
+        body: JSON.stringify({ groupId: groupId })
       });
 
       if (response.ok) {
@@ -63,7 +75,7 @@ function StudentGroup() {
         setExistGrade(true);
       }
     }
-    
+
     getGrade();
   }
 
@@ -85,6 +97,7 @@ function StudentGroup() {
     if (response.ok) {
       const data = await response.json();
       setStudents(data.group.students || []);
+      setGroupName(data.group.name); // Assuming `name` is returned in the response
     }
   };
 
@@ -196,18 +209,7 @@ function StudentGroup() {
 
   return (
     <div className="home">
-      {existGrade ? <div>
-        <div>Total Grade: {totalGrade}/5</div>
-        <div>Cooperation: {cooperationGrade}/5</div>
-        <div>Conceptual Contribution: {conceptualGrade}/5</div>
-        <div>Practical Contribution: {practicalGrade}/5</div>
-        <div>Work Ethic: {workEthicGrade}/5</div>
-      </div>
-      : 
-      <div>
-        Not Graded Yet
-      </div>
-      }
+      <h2 className="groupNameTitle">{groupName}</h2>
       <table className="table">
         <thead>
           <tr>
@@ -224,11 +226,15 @@ function StudentGroup() {
               <td>{student.lastName}</td>
               <td>{student.email}</td>
               <td>
-                <button onClick={() => handleRateStudent(student)}
-                  className={student.rated ? 'btn-rated' : 'btn-not-rated'}
-                >
-                  {student.rated ? 'Change Rating' : 'Not Rated Yet'}
-                </button>
+                {student._id !== currentUserId ? (
+                  <button onClick={() => handleRateStudent(student)}
+                    className={student.rated ? 'btn-rated' : 'btn-not-rated'}
+                  >
+                    {student.rated ? 'Change Rating' : 'Not Rated Yet'}
+                  </button>
+                ) : (
+                  <span>Self</span> // Display "Self" or leave it blank
+                )}
               </td>
             </tr>
           ))}
@@ -341,9 +347,23 @@ function StudentGroup() {
           </Button>
         </Modal.Footer>
       </Modal>
+      <div className="grades">
+        {existGrade ? <div>
+          <h3>Grades</h3>
+          <div>Total Grade: {totalGrade}/5</div>
+          <div>Cooperation: {cooperationGrade}/5</div>
+          <div>Conceptual Contribution: {conceptualGrade}/5</div>
+          <div>Practical Contribution: {practicalGrade}/5</div>
+          <div>Work Ethic: {workEthicGrade}/5</div>
+        </div>
+          :
+          <div>
+            Not Graded Yet
+          </div>
+        }
+      </div>
     </div>
   );
 }
 
 export default StudentGroup;
-
