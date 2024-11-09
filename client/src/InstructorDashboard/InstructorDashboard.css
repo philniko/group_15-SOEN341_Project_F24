@@ -175,6 +175,19 @@ span {
     font-weight: bold;
     color: #d9534f;
     cursor: pointer;
-  }
+}
 
-  
+/* Rename icon styling */
+.rename-icon {
+    text-decoration: none;
+    font-size: 1rem;
+    margin-left: 10px;
+    cursor: pointer;
+    color: #333;
+    display: inline-block;
+}
+
+.rename-icon:hover {
+    color: #1a83ff;
+    text-decoration: none;
+}
