@@ -106,11 +106,11 @@ function Group() {
   return (
     <div className="home">
       <div className="container">
-        <div className='row border-bottom border-secondary pb-3 mb-3'>
+        <div className='row border-bottom border-secondary pb-3 mb-3 align-items-center'>
           <div className='col-5'>
             Number of Students: {students.length}
           </div>
-          <div className='col-7 text-end'>
+          <div className='col-7 text-end' id="create-btn">
             <button onClick={() => addStudent()}>Add Student</button>
             <input
               ref={studentEmailInput}
