@@ -312,6 +312,35 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
   }
 });
 
+// handling group name change
+app.post("/changeGroupName", verifyJWT, async (req, res) => {
+  const userId = req.user.id; // Extract user ID from JWT
+  const { groupId, newName } = req.body; // Extract group ID and the new name from the request body
+
+  try {
+    // Check if the group exists
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Check if the user is the instructor of the group
+    if (group.instructor.toString() !== userId) {
+      return res.status(403).json({ message: "Only the instructor can change the group name" });
+    }
+
+    // Update the group name
+    group.name = newName;
+    await group.save();
+
+    res.status(200).json({ message: "Group name updated successfully", group });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
 // handling student removal from group
 app.post("/removeStudent", verifyJWT, async (req, res) => {
   const { groupId, studentId } = req.body;
