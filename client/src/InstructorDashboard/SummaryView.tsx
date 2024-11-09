@@ -61,8 +61,8 @@ function SummaryView() {
     });
 
     return (
-        <div className="home">
-            <div className="container">
+        <div className="sum">
+            <div className="container-sum">
                 {/* Dropdown for selecting sort column */}
                 <label>Sort by: </label>
                 <select onChange={handleSortKeyChange} value={sortConfig.key}>
