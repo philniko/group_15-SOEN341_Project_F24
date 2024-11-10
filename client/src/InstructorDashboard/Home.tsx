@@ -124,7 +124,7 @@ function Home() {
     });
 
     if (response.ok) {
-      setGroups(groups.map(group => 
+      setGroups(groups.map(group =>
         group._id === groupToRename.id ? { ...group, name: newGroupName } : group
       ));
       setMessageType("success");
@@ -149,19 +149,22 @@ function Home() {
   return (
     <div className="home">
       <div className="container">
-        <div className='row border-bottom border-secondary pb-3 mb-3'>
-          <div className='col-5'>
+        <div className="row border-bottom border-secondary pb-3 mb-3 align-items-center">
+          <div className="col-5">
             Number of Groups: {groups.length}
           </div>
-          <div className='col-7 text-end'>
+          <div className="col-7 text-end" id="create-btn">
             <button onClick={() => createGroup()} className="mr-sm">Create Group</button>
             <input
               ref={groupNameInput}
               placeholder="Group Name"
               onChange={(e) => { setGroupName(e.target.value) }}
-              className={messageType === "error" ? "border border-danger" : ""}>
-            </input>
-            <br /> {message === "" ? null : <small className={messageType === "error" ? "text-danger" : "text-success"}>{message}</small>}
+              className={messageType === "error" ? "border border-danger" : ""}
+            />
+            <br />
+            {message === "" ? null : (
+              <small className={messageType === "error" ? "text-danger" : "text-success"}>{message}</small>
+            )}
           </div>
         </div>
 
@@ -179,7 +182,7 @@ function Home() {
                 <div className="card-body">
                   <h5 className="card-title">
                     {group.name}
-                    <span 
+                    <span
                       onClick={(event) => openRenameModal(group._id, group.name, event)}
                       title="Rename Group"
                       className="rename-icon"

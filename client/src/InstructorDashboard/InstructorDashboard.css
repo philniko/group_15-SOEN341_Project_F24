@@ -6,8 +6,8 @@
     align-items: center;
 }
 
-.navbar h1{
-    color:white;
+.navbar h1 {
+    color: white;
     align-items: center;
     margin-top: auto;
     margin-left: 15px;
@@ -48,7 +48,7 @@
 
 .nav-text a {
     text-decoration: none;
-    color: #f5f5f5 ;
+    color: #f5f5f5;
     font-size: 18px;
     width: 95%;
     height: 100%;
@@ -107,28 +107,31 @@ span {
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    background-color: rgba(0, 0, 0, 0.5);
+    /* Semi-transparent background */
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000; /* Ensure it's above other content */
-  }
-  
-  /* Centered modal content box */
-  .modal-content {
+    z-index: 1000;
+    /* Ensure it's above other content */
+}
+
+/* Centered modal content box */
+.modal-content {
     position: relative;
     background: #fff;
     padding: 20px;
     border-radius: 8px;
     max-width: 400px;
-    width: 90%; /* Responsive width */
+    width: 90%;
+    /* Responsive width */
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     text-align: center;
-  }
-  
-  
-  /* Close button in the top-right corner */
-  .modal-close {
+}
+
+
+/* Close button in the top-right corner */
+.modal-close {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -138,20 +141,20 @@ span {
     font-weight: bold;
     cursor: pointer;
     color: #333;
-  }
-  
-  
-  /* Button styling */
-  .btn-danger {
+}
+
+
+/* Button styling */
+.btn-danger {
     background-color: #d9534f;
     color: #fff;
     border: none;
     padding: 8px 16px;
     cursor: pointer;
     border-radius: 4px;
-  }
+}
 
-  .card-close {
+.card-close {
     position: absolute;
     top: 10px;
     right: 10px;
@@ -161,10 +164,10 @@ span {
     font-weight: bold;
     color: #333;
     cursor: pointer;
-  }
+}
 
-  
-  /* X button in the top-right corner of each card */
+
+/* X button in the top-right corner of each card */
 .card-close:hover {
     position: absolute;
     top: 10px;
@@ -190,4 +193,137 @@ span {
 .rename-icon:hover {
     color: #1a83ff;
     text-decoration: none;
+}
+
+/* Styling for the create button for creating groups and adding students */
+#create-btn {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 1rem;
+}
+
+#create-btn button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+#create-btn button:hover {
+    background-color: #0056b3;
+    transform: translateY(-2px);
+}
+
+#create-btn input {
+    padding: 8px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    width: 200px;
+    transition: border-color 0.3s ease;
+}
+
+#create-btn input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+#create-btn .border-danger {
+    border-color: #dc3545 !important;
+}
+
+#create-btn small {
+    display: inline-block;
+    margin-top: 4px;
+}
+
+#create-btn .text-danger {
+    color: #dc3545 !important;
+}
+
+#create-btn .text-success {
+    color: #28a745 !important;
+}
+
+/* Styling for the summary of results page */
+.sum {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    background-color: #f4f4f9;
+    min-height: 100vh;
+    font-family: Arial, sans-serif;
+}
+
+/* Container styling */
+.container-sum {
+    width: 100%;
+    max-width: 1400px;
+    padding: 2rem;
+    background-color: #ffffff;
+    box-shadow: 10px 10px 10px 16px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+/* Labels and dropdowns */
+label {
+    margin-right: 8px;
+    font-weight: bold;
+    color: #333;
+}
+
+select {
+    padding: 0.5rem;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    margin-right: 1rem;
+    font-size: 1rem;
+    color: #333;
+    transition: border-color 0.3s ease;
+}
+
+select:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 4px rgba(0, 123, 255, 0.5);
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    font-size: 0.95rem;
+}
+
+th, td {
+    padding: 0.75rem;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #f9f9f9;
+    color: #555;
+    font-weight: bold;
+}
+
+tbody tr:hover {
+    background-color: #f1f7ff;
+}
+
+tbody tr:nth-child(even) {
+    background-color: #fafafa;
+}
+
+/* Special styling for headers */
+thead tr th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
 }
