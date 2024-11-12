@@ -1,0 +1,15 @@
+Meeting Minutes #6
+Date: October 30th 2024
+Time: 8:00-9:10
+Present: Carlo Ramadori, Omar Chabti, Kevin Liu, Charles Partous
+Sprint: Sprint 3
+Goals:
+1. Create User Stories for Sprint 3
+2. Divide Tasks to each team member
+Summary:
+* Updating user stories for Sprint 2
+* Created 4 User Stories for Sprint 3, the summary view for instructors, the detailed view for instructors, the group management, and the Student grade view
+* The student grade view is our extra feature for this sprint, it allows the student to view his average rating (made by his peers) for each of the four assessment dimensions in his group
+* The group management will allow the instructor to delete students from a group and delete whole groups
+* There are also bug fixes to be made in the student grading interface
+* Additionally, styling was added to the list of tasks to be done
