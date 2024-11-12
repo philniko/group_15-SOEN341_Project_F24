@@ -1,0 +1,16 @@
+Meeting Minutes #7
+Date: November 6th 2024
+Time: 8:00-8:45
+Present: Carlo Ramadori, Philippe Nikolov, Kevin Liu, Charles Partous, Zachary Corber, Omar Chabti
+Sprint: Sprint 3
+Goals:
+1. Divide Tasks to each team member
+Summary:
+* Charles will take care of 
+* Zach will style all pages, including the student rating interface, the student home page for groups, the instructor summary view, the instructor detailed view, the student grade view and the different buttons that will be added to delete a group and remove a student from a group
+* Kevin will implement the student grade view, which will allow students to view their grade so far in the group, based on the feedback of other students
+* Phil will implement the detailed view for the instructor as explained in the Sprint 3 guidelines
+* Carlo finished the instructor summary view as explained in the Sprint 3 guidelines, and will write the acceptance tests for the User Stories from Sprint 1 and 2
+* Omar will take care of the unit tests for Sprint 1 and 2
+* Charles will implement the delete group button for the instructor and the remove student from a group button on the instructor side as well
+
