@@ -6,14 +6,14 @@ import { jwtDecode } from 'jwt-decode';
 
 import StudentGroup from './StudentDashboard/StudentGroup.tsx'
 import HomeStudent from './StudentDashboard/Home.tsx'
-import NavbarStudent from './StudentDashboard/Navbar.tsx'
 import './StudentDashboard/StudentDashboard.css'
 
 import HomeInstructor from './InstructorDashboard/Home.tsx'
 import Group from "./InstructorDashboard/Group.tsx"
 import SummaryView from './InstructorDashboard/SummaryView.tsx'
-import NavbarInstructor from './InstructorDashboard/Navbar.tsx'
+import Navbar from './Navbar/Navbar.tsx'
 import './InstructorDashboard/InstructorDashboard.css'
+import DetailedView from './InstructorDashboard/DetailedView.tsx';
 
 const ProtectedRoute = ({ element: Component, requiredRole, ...rest }: any) => {
   const token = localStorage.getItem('token');
@@ -45,7 +45,7 @@ function App() {
 
   const StudentDashboard = () => (
     <>
-      <NavbarStudent />
+      <Navbar />
       <Routes>
         <Route path="/home" element={<HomeStudent />} />
         <Route path="group/:groupId" element={<StudentGroup />}></Route>
@@ -55,14 +55,17 @@ function App() {
 
   const InstructorDashboard = () => (
     <>
-      <NavbarInstructor />
+      <Navbar />
       <Routes>
-        <Route path="/home" element={<HomeInstructor />} />
-        <Route path="/SummaryView" element={<SummaryView/>}></Route>
-        <Route path="group/:id" element={<Group />}></Route>
+        <Route path="home" element={<HomeInstructor />} />
+        <Route path="SummaryView" element={<SummaryView />} />
+        <Route path="group/:groupId" element={<Group />} />
+        <Route path="group/:groupId/student/:studentId" element={<DetailedView />} />
+        <Route path="*" element={<Navigate to="/instructor/home" />} />
       </Routes>
     </>
   );
+  
 
   return (
     <BrowserRouter>
