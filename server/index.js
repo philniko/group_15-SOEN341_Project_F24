@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
-import RatingModel from "./models/Ratings.js"
+import RatingModel from "./models/Ratings.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -38,28 +38,43 @@ app.post("/register", (req, res) => {
 
   //making sure all fields are filled
   if (!firstName) {
-    return res.status(400).json({ type: "firstName", message: "Please enter your first name!" });
+    return res
+      .status(400)
+      .json({ type: "firstName", message: "Please enter your first name!" });
   }
   if (!lastName) {
-    return res.status(400).json({ type: "lastName", message: "Please enter your last name!" });
+    return res
+      .status(400)
+      .json({ type: "lastName", message: "Please enter your last name!" });
   }
   if (!email) {
-    return res.status(400).json({ type: "email", message: "Please enter your email!" });
+    return res
+      .status(400)
+      .json({ type: "email", message: "Please enter your email!" });
   }
   if (!password) {
-    return res.status(400).json({ type: "password", message: "Please enter your password!" });
+    return res
+      .status(400)
+      .json({ type: "password", message: "Please enter your password!" });
   }
   if (!role) {
-    return res.status(400).json({ type: "role", message: "Please choose your role!" });
+    return res
+      .status(400)
+      .json({ type: "role", message: "Please choose your role!" });
   }
 
   //checking to see if the user already exists
   try {
     const existingUser = UserModel.findOne({
-      email: email
+      email: email,
     }).then((user) => {
       if (user) {
-        return res.status(409).json({ type: "email", message: "The email has already been taken!" });
+        return res
+          .status(409)
+          .json({
+            type: "email",
+            message: "The email has already been taken!",
+          });
       } else {
         //create new user, password is hashed in UserSchema.js
         const newUser = new UserModel({
@@ -77,7 +92,9 @@ app.post("/register", (req, res) => {
     });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ type: "server", message: "Server Registration Error" });
+    res
+      .status(500)
+      .json({ type: "server", message: "Server Registration Error" });
   }
 });
 
@@ -85,7 +102,9 @@ app.post("/register", (req, res) => {
 app.post("/login", (req, res) => {
   UserModel.findOne({ email: req.body.email }).then((user) => {
     if (!user) {
-      res.status(404).json({ type: "general", message: "Incorrect email or password!" });
+      res
+        .status(404)
+        .json({ type: "general", message: "Incorrect email or password!" });
     } else {
       const validPassword = bcrypt.compareSync(
         req.body.password,
@@ -93,12 +112,24 @@ app.post("/login", (req, res) => {
       );
       if (validPassword) {
         //generate token
-        const token = jwt.sign({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role }, JWT_SECRET, {
-          expiresIn: "1h",
-        });
+        const token = jwt.sign(
+          {
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            role: user.role,
+          },
+          JWT_SECRET,
+          {
+            expiresIn: "1h",
+          }
+        );
         res.status(200).json({ role: user.role, token: token });
       } else {
-        res.status(401).json({ type: "general", message: "Incorrect email or password!" });
+        res
+          .status(401)
+          .json({ type: "general", message: "Incorrect email or password!" });
       }
     }
   });
@@ -110,21 +141,24 @@ app.post("/getGroups", verifyJWT, (req, res) => {
 
   UserModel.findById(userId)
     .populate({
-      path: 'groups',
+      path: "groups",
       populate: {
-        path: 'instructor', // Populate the instructor details within the group
-        select: 'firstName lastName'  // Select the necessary fields from the instructor
-      }
+        path: "instructor", // Populate the instructor details within the group
+        select: "firstName lastName", // Select the necessary fields from the instructor
+      },
     })
     .then((user) => {
       if (!user) {
-        return res.status(400).json({ type: "error", message: "User not found" });
+        return res
+          .status(400)
+          .json({ type: "error", message: "User not found" });
       }
       return res.status(200).json({ groups: user.groups });
     })
-    .catch(() => res.status(500).json({ type: "error", message: "Server error" }));
+    .catch(() =>
+      res.status(500).json({ type: "error", message: "Server error" })
+    );
 });
-
 
 app.post("/getGroup", verifyJWT, async (req, res) => {
   const userId = req.user.id; // Extract user ID from JWT
@@ -145,7 +179,9 @@ app.post("/getGroup", verifyJWT, async (req, res) => {
     }
 
     // Create a set of rateeIds that the current user has rated
-    const ratedStudentIds = new Set(group.ratings.map((rating) => rating.ratee.toString()));
+    const ratedStudentIds = new Set(
+      group.ratings.map((rating) => rating.ratee.toString())
+    );
 
     // Add 'rated' property to each student
     const studentsWithRatedStatus = group.students.map((student) => ({
@@ -165,8 +201,8 @@ app.post("/getGroup", verifyJWT, async (req, res) => {
   }
 });
 
-
-app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
+app.post("/getStudentGroup", verifyJWT, (req, res) => {
+  //request format: {id: String} (team id)
   let { user } = req.user;
   if (!user.groups || user.groups.length === 0) {
     return res.status(400).json({ error: "User does not belong to any group" });
@@ -186,24 +222,23 @@ app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: S
 });
 
 //handling group creation
-app.post("/createGroup", verifyJWT, (req, res) => { //request format: {id: String, name: String} (instructor ID and team name)
+app.post("/createGroup", verifyJWT, (req, res) => {
+  //request format: {id: String, name: String} (instructor ID and team name)
   const userId = req.user.id; // Extract user ID from JWT
   const name = req.body.name;
   UserModel.findById(userId)
     .then((user) => {
       if (!user) {
         res.status(400).json("Instructor does not exist");
-      }
-      else if (user.role != "instructor") {
+      } else if (user.role != "instructor") {
         res.status(400).json("User is not an instructor");
-      }
-      else {
+      } else {
         //creating group
         const group = {
           name: name,
           instructor: user,
           students: [],
-          ratings: []
+          ratings: [],
         };
 
         GroupModel.create(group)
@@ -233,13 +268,15 @@ app.post("/removeGroup", verifyJWT, async (req, res) => {
 
     // Ensure that the requesting user is the instructor of the group
     if (group.instructor.toString() !== userId) {
-      return res.status(403).json({ message: "Only the instructor can delete this group" });
+      return res
+        .status(403)
+        .json({ message: "Only the instructor can delete this group" });
     }
 
     // Remove the group reference from all students in the group's `students` array
     await UserModel.updateMany(
-      { _id: { $in: group.students } },  // Find all users in this group
-      { $pull: { groups: groupId } }     // Remove the group reference
+      { _id: { $in: group.students } }, // Find all users in this group
+      { $pull: { groups: groupId } } // Remove the group reference
     );
 
     // Optional: Remove all associated ratings for this group
@@ -255,32 +292,34 @@ app.post("/removeGroup", verifyJWT, async (req, res) => {
   }
 });
 //handling student addition
-app.post("/addStudent", (req, res) => { //request format: {groupId: String, userEmail: String}
+app.post("/addStudent", (req, res) => {
+  //request format: {groupId: String, userEmail: String}
 
   const { groupId, userEmail } = req.body;
 
   if (!groupId) {
     res.status(400).json({ type: "error", message: "Missing group id!" });
-  }
-  else if (!userEmail) {
+  } else if (!userEmail) {
     res.status(400).json({ type: "error", message: "Missing student email!" });
-  }
-  else {
+  } else {
     UserModel.findOne({ email: userEmail })
       .then((user) => {
         if (!user) {
-          res.status(400).json({ type: "error", message: "User does not exit!" });
-        }
-        else if (user.role != "student") {
-          res.status(400).json({ type: "error", message: "User is not a student!" });
-        }
-        else {
+          res
+            .status(400)
+            .json({ type: "error", message: "User does not exit!" });
+        } else if (user.role != "student") {
+          res
+            .status(400)
+            .json({ type: "error", message: "User is not a student!" });
+        } else {
           GroupModel.findById(groupId)
             .then((group) => {
               if (!group) {
-                res.status(400).json({ type: "error", message: "Group does not exist!" });
-              }
-              else {
+                res
+                  .status(400)
+                  .json({ type: "error", message: "Group does not exist!" });
+              } else {
                 let valid = true;
 
                 for (let i = 0; i < user.groups.length; i++) {
@@ -291,9 +330,13 @@ app.post("/addStudent", (req, res) => { //request format: {groupId: String, user
                 }
 
                 if (!valid) {
-                  res.status(400).json({ type: "error", message: "User is already a member of the group!" });
-                }
-                else {
+                  res
+                    .status(400)
+                    .json({
+                      type: "error",
+                      message: "User is already a member of the group!",
+                    });
+                } else {
                   //updating student groups and group students arrays
                   user.groups.push(group);
                   group.students.push(user);
@@ -326,7 +369,9 @@ app.post("/changeGroupName", verifyJWT, async (req, res) => {
 
     // Check if the user is the instructor of the group
     if (group.instructor.toString() !== userId) {
-      return res.status(403).json({ message: "Only the instructor can change the group name" });
+      return res
+        .status(403)
+        .json({ message: "Only the instructor can change the group name" });
     }
 
     // Update the group name
@@ -339,7 +384,6 @@ app.post("/changeGroupName", verifyJWT, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
-
 
 // handling student removal from group
 app.post("/removeStudent", verifyJWT, async (req, res) => {
@@ -360,25 +404,29 @@ app.post("/removeStudent", verifyJWT, async (req, res) => {
 
     // Check if the student is part of the group
     if (!group.students.includes(studentId)) {
-      return res.status(400).json({ message: "Student is not a member of this group" });
+      return res
+        .status(400)
+        .json({ message: "Student is not a member of this group" });
     }
 
     // Remove the student from the group's students array
-    group.students = group.students.filter(id => id.toString() !== studentId);
+    group.students = group.students.filter((id) => id.toString() !== studentId);
     await group.save();
 
     // Remove the group from the student's groups array
-    student.groups = student.groups.filter(id => id.toString() !== groupId);
+    student.groups = student.groups.filter((id) => id.toString() !== groupId);
     await student.save();
 
-    res.status(200).json({ message: "Student removed from group successfully" });
+    res
+      .status(200)
+      .json({ message: "Student removed from group successfully" });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-app.post('/saveRating', verifyJWT, async (req, res) => {
+app.post("/saveRating", verifyJWT, async (req, res) => {
   const {
     rateeId,
     Cooperation,
@@ -396,10 +444,10 @@ app.post('/saveRating', verifyJWT, async (req, res) => {
 
   try {
     // Check if the group exists
-    const group = await GroupModel.findById(groupId).populate('ratings');
+    const group = await GroupModel.findById(groupId).populate("ratings");
 
     if (!group) {
-      return res.status(404).json({ message: 'Group not found' });
+      return res.status(404).json({ message: "Group not found" });
     }
 
     const raterObjectID = new mongoose.Types.ObjectId(userId);
@@ -417,9 +465,11 @@ app.post('/saveRating', verifyJWT, async (req, res) => {
       existingRating.CooperationRating = Cooperation;
       existingRating.CooperationFeedback = CooperationFeedback;
       existingRating.ConceptualContributionRating = ConceptualContribution;
-      existingRating.ConceptualContributionFeedback = ConceptualContributionFeedback;
+      existingRating.ConceptualContributionFeedback =
+        ConceptualContributionFeedback;
       existingRating.PracticalContributionRating = PracticalContribution;
-      existingRating.PracticalContributionFeedback = PracticalContributionFeedback;
+      existingRating.PracticalContributionFeedback =
+        PracticalContributionFeedback;
       existingRating.WorkEthicRating = WorkEthic;
       existingRating.WorkEthicFeedback = WorkEthicFeedback;
 
@@ -447,15 +497,14 @@ app.post('/saveRating', verifyJWT, async (req, res) => {
       await group.save();
     }
 
-    res.status(200).json({ message: 'Successful save' });
+    res.status(200).json({ message: "Successful save" });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-
-app.post('/getRating', verifyJWT, async (req, res) => {
+app.post("/getRating", verifyJWT, async (req, res) => {
   const userId = req.user.id; // Rater ID (current user)
   const { groupId, rateeId } = req.body;
 
@@ -473,43 +522,85 @@ app.post('/getRating', verifyJWT, async (req, res) => {
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Server error' });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-app.get('/getSummaryView', verifyJWT, async(req,res) => {
+app.post("/getStudentRatings", verifyJWT, async (req, res) => {
+  const { groupId, studentId } = req.body;
+
+  try {
+    // Find the group to ensure it exists
+    const group = await GroupModel.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Find all ratings for the student in the specified group
+    const ratings = await RatingModel.find({
+      ratee: studentId,
+      group: groupId,
+    }).populate("rater", "firstName lastName email");
+
+    // If no ratings are found
+    if (!ratings || ratings.length === 0) {
+      return res.status(200).json({ ratings: [] });
+    }
+
+    res.status(200).json({ ratings });
+  } catch (error) {
+    console.error("Error fetching student ratings:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.get("/getSummaryView", verifyJWT, async (req, res) => {
   try {
     const groups = await GroupModel.find()
-        .populate({
-          path: 'students',
-          select: 'email firstName lastName', // Get basic student info
-        })
-        .populate({
-          path: 'ratings',
-          populate: { path: 'ratee', select: '_id' }, // Populate ratee for rating calculations
-        });
+      .populate({
+        path: "students",
+        select: "email firstName lastName", // Get basic student info
+      })
+      .populate({
+        path: "ratings",
+        populate: { path: "ratee", select: "_id" }, // Populate ratee for rating calculations
+      });
 
     const studentSummaries = groups.flatMap((group) => {
       return group.students.map((student) => {
         // Filter ratings where this student is the ratee
-        const studentRatings = group.ratings.filter(
-            (rating) => rating.ratee.equals(student._id)
+        const studentRatings = group.ratings.filter((rating) =>
+          rating.ratee.equals(student._id)
         );
 
         // Calculate averages and peer count
         const avgCooperation = studentRatings.length
-            ? studentRatings.reduce((acc, r) => acc + r.CooperationRating, 0) / studentRatings.length
-            : 0;
+          ? studentRatings.reduce((acc, r) => acc + r.CooperationRating, 0) /
+            studentRatings.length
+          : 0;
         const avgConceptualContribution = studentRatings.length
-            ? studentRatings.reduce((acc, r) => acc + r.ConceptualContributionRating, 0) / studentRatings.length
-            : 0;
+          ? studentRatings.reduce(
+              (acc, r) => acc + r.ConceptualContributionRating,
+              0
+            ) / studentRatings.length
+          : 0;
         const avgPracticalContribution = studentRatings.length
-            ? studentRatings.reduce((acc, r) => acc + r.PracticalContributionRating, 0) / studentRatings.length
-            : 0;
+          ? studentRatings.reduce(
+              (acc, r) => acc + r.PracticalContributionRating,
+              0
+            ) / studentRatings.length
+          : 0;
         const avgWorkEthic = studentRatings.length
-            ? studentRatings.reduce((acc, r) => acc + r.WorkEthicRating, 0) / studentRatings.length
-            : 0;
-        const overallAverage = (avgCooperation + avgConceptualContribution + avgPracticalContribution + avgWorkEthic) / 4;
+          ? studentRatings.reduce((acc, r) => acc + r.WorkEthicRating, 0) /
+            studentRatings.length
+          : 0;
+        const overallAverage =
+          (avgCooperation +
+            avgConceptualContribution +
+            avgPracticalContribution +
+            avgWorkEthic) /
+          4;
         const peersResponded = studentRatings.length;
 
         return {
@@ -530,7 +621,7 @@ app.get('/getSummaryView', verifyJWT, async(req,res) => {
     res.status(200).json(studentSummaries);
   } catch (error) {
     console.error(error);
-    res.status(500).json({ message: 'Error fetching student ratings summary' });
+    res.status(500).json({ message: "Error fetching student ratings summary" });
   }
 });
 
@@ -538,40 +629,47 @@ app.post("/getGrade", verifyJWT, (req, res) => {
   const userId = req.user.id;
   const groupId = req.body.groupId;
 
-  GroupModel.findById(groupId).populate({path: "ratings"}).then((group) => {
-    let numberOfRatings = 0;
-    let cooperationTotal = 0;
-    let conceptualTotal = 0;
-    let practicalTotal = 0;
-    let workEthicTotal = 0;
+  GroupModel.findById(groupId)
+    .populate({ path: "ratings" })
+    .then((group) => {
+      let numberOfRatings = 0;
+      let cooperationTotal = 0;
+      let conceptualTotal = 0;
+      let practicalTotal = 0;
+      let workEthicTotal = 0;
 
-    for (let i = 0; i < group.ratings.length; i++) {
-      if (group.ratings[i].ratee._id.equals(userId)) {
-        numberOfRatings += 1;
-        cooperationTotal += group.ratings[i].CooperationRating;
-        conceptualTotal += group.ratings[i].ConceptualContributionRating;
-        practicalTotal += group.ratings[i].PracticalContributionRating;
-        workEthicTotal += group.ratings[i].WorkEthicRating;
+      for (let i = 0; i < group.ratings.length; i++) {
+        if (group.ratings[i].ratee._id.equals(userId)) {
+          numberOfRatings += 1;
+          cooperationTotal += group.ratings[i].CooperationRating;
+          conceptualTotal += group.ratings[i].ConceptualContributionRating;
+          practicalTotal += group.ratings[i].PracticalContributionRating;
+          workEthicTotal += group.ratings[i].WorkEthicRating;
+        }
       }
-    }
 
-    if (numberOfRatings == 0) {
-      res.status(300).json({
-        message: "No ratings"
-      });
-    }
-    else {
-      res.status(200).json({
-        totalGrade: (cooperationTotal + conceptualTotal + practicalTotal + workEthicTotal) / (4 * numberOfRatings),
-        cooperationGrade: cooperationTotal / numberOfRatings,
-        conceptualGrade: conceptualTotal / numberOfRatings,
-        practicalGrade: practicalTotal / numberOfRatings,
-        workEthicGrade: workEthicTotal / numberOfRatings
-      });
-    }
-  }).catch((err) => {
-    res.status(500).json(err);
-  });
+      if (numberOfRatings == 0) {
+        res.status(300).json({
+          message: "No ratings",
+        });
+      } else {
+        res.status(200).json({
+          totalGrade:
+            (cooperationTotal +
+              conceptualTotal +
+              practicalTotal +
+              workEthicTotal) /
+            (4 * numberOfRatings),
+          cooperationGrade: cooperationTotal / numberOfRatings,
+          conceptualGrade: conceptualTotal / numberOfRatings,
+          practicalGrade: practicalTotal / numberOfRatings,
+          workEthicGrade: workEthicTotal / numberOfRatings,
+        });
+      }
+    })
+    .catch((err) => {
+      res.status(500).json(err);
+    });
 });
 
 app.listen(3001, () => {
