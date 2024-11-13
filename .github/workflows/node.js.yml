@@ -8,7 +8,7 @@ on:
 
 jobs:
   run-tests:
-    runs-on: windows-latest  # You can also use 'windows-latest' or 'macos-latest' if needed
+    runs-on: windows-latest  
 
     steps:
       - uses: actions/checkout@v3
@@ -29,6 +29,11 @@ jobs:
         run: |
           npm run dev &
       
+      - name: Run Client Tests
+        working-directory: client
+        run: |
+          npm run test -- -- watchAll=false
+
       # Install and run the server
       - name: Install Server Dependencies
         working-directory: server
@@ -38,4 +43,4 @@ jobs:
         working-directory: server
         run: |
           npm start &
-      
+          
