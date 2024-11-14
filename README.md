@@ -47,6 +47,7 @@ To run the application locally:
     npm install
     node dbcreation.js
     ```
+Please note, the password of all users from this script is: **password**.
 
 ### Application Usage
 
