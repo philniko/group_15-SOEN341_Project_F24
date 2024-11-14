@@ -15,3 +15,26 @@ Charles Partous (40175854):
 - Added group removal feature to instructor dashboard frontend
 - Added student removal feature to instructor dashboard frontend
 - Added group name change feature to instructor dashboard frontend
+
+Omar Chabti (40262497)
+
+-Implemented unit tests for login features
+-Implemented unit tests for registration features
+-Implemented unit tests for group features
+-Automated test running feature on github
+
+Kevin LIu (40281197)
+-Implemented the student grade view
+-Modified the backend to accommodate view student grade requests
+-Allowed students to see their grades from the team menu
+
+Carlo Ramadori (40243639)
+-Implemented the summary view for the instructor dashboard
+-Wrote the meeting minutes for Sprint 3
+-Wrote the acceptance Criteria for Sprint 3 Summary View
+
+Zachary Corber (40246724)
+- Removed option to grade yourself as a student, implemented fix for rating button
+- Added styling for student dashboard and groups page
+- Added styling for instructor dashboard and groups page
+- Added styling for summary of results page on instructor side
