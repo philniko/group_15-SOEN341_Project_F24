@@ -6,7 +6,12 @@ function Group() {
   const studentEmailInput = useRef<HTMLInputElement>(null);
   const [studentEmail, setStudentEmail] = useState("");
   const [students, setStudents] = useState<
-    { _id: string; firstName: string; lastName: string }[]
+    {
+      _id: string;
+      firstName: string;
+      lastName: string;
+      overallGrade: string;
+    }[]
   >([]);
   const [messageType, setMessageType] = useState("");
   const [message, setMessage] = useState("");
@@ -24,7 +29,7 @@ function Group() {
         "Content-Type": "application/json",
         "x-access-token": token,
       },
-      body: JSON.stringify({ id: groupId}),
+      body: JSON.stringify({ id: groupId }),
     });
 
     if (response.ok) {
@@ -141,7 +146,7 @@ function Group() {
             <div
               key={String(student._id)}
               className="col-12 mb-3"
-              onClick={() =>  navigate(`student/${student._id}`)}
+              onClick={() => navigate(`student/${student._id}`)}
             >
               <div className="card">
                 {/* X button to delete the student */}
@@ -158,7 +163,9 @@ function Group() {
                   <h5 className="card-title">
                     {student.firstName + " " + student.lastName}
                   </h5>
-                  <p className="card-text">Overall Grade: {"TODO"}</p>
+                  <p className="card-text">
+                    Overall Grade: {student.overallGrade}
+                  </p>
                 </div>
               </div>
             </div>
