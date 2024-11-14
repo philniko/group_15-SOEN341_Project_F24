@@ -37,6 +37,12 @@ const baseURL = "http://localhost:3001";
     }
 
     // Step 3: Create groups for each instructor
+    const totalStudents = students.length;
+    const totalInstructors = instructors.length;
+    const studentsPerInstructor = Math.ceil(totalStudents / totalInstructors);
+
+    let studentIndex = 0;
+
     for (const instructor of instructors) {
       const token = userTokens[instructor.email];
       if (!token) continue;
@@ -45,8 +51,16 @@ const baseURL = "http://localhost:3001";
       const groupSize = 5;
       let groupIndex = 0;
 
-      while (groupIndex < students.length) {
-        const groupStudents = students.slice(
+      // Get the subset of students for this instructor
+      const instructorStudents = students.slice(
+        studentIndex,
+        studentIndex + studentsPerInstructor
+      );
+
+      studentIndex += studentsPerInstructor;
+
+      while (groupIndex < instructorStudents.length) {
+        const groupStudents = instructorStudents.slice(
           groupIndex,
           groupIndex + groupSize
         );
