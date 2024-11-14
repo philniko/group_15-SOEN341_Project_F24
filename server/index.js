@@ -4,7 +4,6 @@ import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
 import RatingModel from "./models/Ratings.js";
-import RatingModel from "./models/Ratings.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -64,35 +63,37 @@ app.post("/register", async (req, res) => {
       .json({ type: "role", message: "Please choose your role!" });
   }
 
-  //checking to see if the user already exists
   try {
-    const existingUser = UserModel.findOne({
-      email: email
-    }).then((user) => {
-      if (user) {
-        return res.status(409).json({ type: "email", message: "The email has already been taken!" });
-      } else {
-        //create new user, password is hashed in UserSchema.js
-        const newUser = new UserModel({
-          firstName,
-          lastName,
-          email,
-          password,
-          role,
-          groups: [],
-        });
+    // Check if the user already exists
+    const existingUser = await UserModel.findOne({ email });
+    if (existingUser) {
+      return res
+        .status(409)
+        .json({ type: "email", message: "The email has already been taken!" });
+    }
+
+    // Create and save the new user
+    const newUser = new UserModel({
+      firstName,
+      lastName,
+      email,
+      password, // This will be hashed automatically by the UserModel's pre-save middleware
+      role,
+      groups: [],
+    });
 
     const savedUser = await newUser.save();
     res
       .status(201)
       .json({ message: "User registered successfully", user: savedUser });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ type: "server", message: "Server Registration Error" });
+    console.error("Error during registration:", error);
+    res
+      .status(500)
+      .json({ type: "server", message: "Server Registration Error" });
   }
 });
 
-//handling login request
 // Handling login request
 app.post("/login", async (req, res) => {
   const { email, password } = req.body;
@@ -100,23 +101,37 @@ app.post("/login", async (req, res) => {
   try {
     const user = await UserModel.findOne({ email });
     if (!user) {
-      res.status(404).json({ type: "general", message: "Incorrect email or password!" });
-    } else {
-      const validPassword = bcrypt.compareSync(
-        req.body.password,
-        user.password
-      );
-      if (validPassword) {
-        //generate token
-        const token = jwt.sign({ id: user._id, firstName: user.firstName, lastName: user.lastName, email: user.email, role: user.role }, JWT_SECRET, {
-          expiresIn: "1h",
-        });
-        res.status(200).json({ role: user.role, token: token });
-      } else {
-        res.status(401).json({ type: "general", message: "Incorrect email or password!" });
-      }
+      return res
+        .status(404)
+        .json({ type: "general", message: "Incorrect email or password!" });
     }
-  });
+
+    // Compare hashed password
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return res
+        .status(401)
+        .json({ type: "general", message: "Incorrect email or password!" });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+      },
+      JWT_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.status(200).json({ role: user.role, token });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 //handling getGroups request
@@ -149,48 +164,103 @@ app.post("/getGroup", verifyJWT, async (req, res) => {
   const { id } = req.body; // Group ID
 
   try {
-    // Fetch the group and populate students and ratings given by the current user
+    // Fetch the group and populate students and ratings
     const group = await GroupModel.findById(id)
       .populate("students")
       .populate({
         path: "ratings",
-        match: { rater: userId }, // Only ratings given by the current user
-        select: "ratee", // Only select the ratee field
+        populate: { path: "ratee rater", select: "_id" }, // Populate ratee and rater IDs
       });
 
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
     }
 
-    // Create a set of rateeIds that the current user has rated
-    const ratedStudentIds = new Set(
-      group.ratings.map((rating) => rating.ratee.toString())
-    );
+    // Create a map to hold the ratings received by each student
+    const studentRatingsMap = {};
 
-    // Add 'rated' property to each student
-    const studentsWithRatedStatus = group.students.map((student) => ({
-      ...student.toObject(),
-      rated: ratedStudentIds.has(student._id.toString()),
-    }));
+    // Initialize the map with empty arrays for each student
+    group.students.forEach((student) => {
+      studentRatingsMap[student._id] = [];
+    });
+
+    // Fill the map with ratings
+    group.ratings.forEach((rating) => {
+      // Ensure the ratee is in the map (in case of data inconsistency)
+      if (studentRatingsMap[rating.ratee._id]) {
+        studentRatingsMap[rating.ratee._id].push(rating);
+      }
+    });
+
+    // Add 'rated' and 'overallGrade' properties to each student
+    const studentsWithGrades = group.students.map((student) => {
+      // Calculate the overall grade for the student
+      const ratingsReceived = studentRatingsMap[student._id];
+      let overallGrade = null;
+
+      if (ratingsReceived && ratingsReceived.length > 0) {
+        const totalGrades = ratingsReceived.reduce(
+          (acc, rating) => {
+            acc.Cooperation += rating.CooperationRating;
+            acc.ConceptualContribution += rating.ConceptualContributionRating;
+            acc.PracticalContribution += rating.PracticalContributionRating;
+            acc.WorkEthic += rating.WorkEthicRating;
+            return acc;
+          },
+          {
+            Cooperation: 0,
+            ConceptualContribution: 0,
+            PracticalContribution: 0,
+            WorkEthic: 0,
+          }
+        );
+
+        const numberOfRatings = ratingsReceived.length;
+        const avgCooperation = totalGrades.Cooperation / numberOfRatings;
+        const avgConceptual =
+          totalGrades.ConceptualContribution / numberOfRatings;
+        const avgPractical =
+          totalGrades.PracticalContribution / numberOfRatings;
+        const avgWorkEthic = totalGrades.WorkEthic / numberOfRatings;
+
+        overallGrade =
+          (avgCooperation + avgConceptual + avgPractical + avgWorkEthic) / 4;
+      }
+
+      return {
+        ...student.toObject(),
+        rated: group.ratings.some(
+          (rating) =>
+            rating.rater._id.toString() === userId &&
+            rating.ratee._id.toString() === student._id.toString()
+        ),
+        overallGrade:
+          overallGrade !== null ? overallGrade.toFixed(2) : "No Ratings",
+      };
+    });
 
     res.status(200).json({
       group: {
         ...group.toObject(),
-        students: studentsWithRatedStatus,
+        students: studentsWithGrades,
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("Error in /getGroup:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
+app.post("/getStudentGroup", verifyJWT, async (req, res) => {
+  try {
+    const userId = req.user.id; // Extract user ID from JWT
+    const user = await UserModel.findById(userId).populate("groups"); // Fetch user with populated groups
 
-app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: String} (team id)
-  let { user } = req.user;
-  if (!user.groups || user.groups.length === 0) {
-    return res.status(400).json({ error: "User does not belong to any group" });
-  }
+    if (!user || !user.groups || user.groups.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "User does not belong to any group" });
+    }
 
     const groupId = user.groups[0]._id; // Assuming user belongs to one group
     const group = await GroupModel.findById(groupId).populate("students"); // Fetch group with populated students
@@ -206,38 +276,53 @@ app.post("/getStudentGroup", verifyJWT, (req, res) => { //request format: {id: S
   }
 });
 
-//handling group creation
-app.post("/createGroup", verifyJWT, (req, res) => {
-  //request format: {id: String, name: String} (instructor ID and team name)
+app.post("/createGroup", verifyJWT, async (req, res) => {
   const userId = req.user.id; // Extract user ID from JWT
   const name = req.body.name;
-  UserModel.findById(userId)
-    .then((user) => {
-      if (!user) {
-        res.status(400).json("Instructor does not exist");
-      } else if (user.role != "instructor") {
-        res.status(400).json("User is not an instructor");
-      } else {
-        //creating group
-        const group = {
-          name: name,
-          instructor: user,
-          students: [],
-          ratings: [],
-        };
 
-        GroupModel.create(group)
-          .then((group) => {
-            //updating instructor's groups array
-            user.groups.push(group);
-            user.save();
-            res.status(200).json(group);
-          })
-          .catch((err) => res.status(500).json(err));
-      }
-    })
-    .catch((err) => res.status(500).json(err));
+  try {
+    const user = await UserModel.findById(userId);
+
+    if (!user) {
+      return res.status(400).json({ message: "Instructor does not exist" });
+    }
+
+    if (user.role.toLowerCase() !== "instructor") {
+      return res.status(403).json({ message: "User is not an instructor" });
+    }
+
+    // Check if group name already exists for this instructor
+    const existingGroup = await GroupModel.findOne({
+      name: name,
+      instructor: userId,
+    });
+    if (existingGroup) {
+      return res.status(400).json({ message: "Group name already exists" });
+    }
+
+    // Creating group
+    const group = new GroupModel({
+      name: name,
+      instructor: user,
+      students: [],
+      ratings: [],
+    });
+
+    const savedGroup = await group.save();
+
+    // Updating instructor's groups array
+    user.groups.push(savedGroup._id);
+    await user.save();
+
+    res.status(200).json(savedGroup);
+  } catch (err) {
+    console.error("Error creating group:", err);
+    res
+      .status(500)
+      .json({ message: "Error creating group", error: err.message });
+  }
 });
+
 // handling group removal
 app.post("/removeGroup", verifyJWT, async (req, res) => {
   const userId = req.user.id; // Extract user ID from JWT
@@ -315,9 +400,11 @@ app.post("/addStudent", (req, res) => {
                 }
 
                 if (!valid) {
-                  res.status(400).json({ type: "error", message: "User is already a member of the group!" });
-                }
-                else {
+                  res.status(400).json({
+                    type: "error",
+                    message: "User is already a member of the group!",
+                  });
+                } else {
                   //updating student groups and group students arrays
                   user.groups.push(group);
                   group.students.push(user);
@@ -507,7 +594,7 @@ app.post("/getRating", verifyJWT, async (req, res) => {
   }
 });
 
-app.get('/getSummaryView', verifyJWT, async(req,res) => {
+app.get("/getSummaryView", verifyJWT, async (req, res) => {
   try {
     const groups = await GroupModel.find()
       .populate({
@@ -622,6 +709,35 @@ app.post("/getGrade", verifyJWT, (req, res) => {
     .catch((err) => {
       res.status(500).json(err);
     });
+});
+
+app.post("/getStudentRatings", verifyJWT, async (req, res) => {
+  const { groupId, studentId } = req.body;
+
+  try {
+    // Find the group to ensure it exists
+    const group = await GroupModel.findById(groupId);
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    // Find all ratings for the student in the specified group
+    const ratings = await RatingModel.find({
+      ratee: studentId,
+      group: groupId,
+    }).populate("rater", "firstName lastName email");
+
+    // If no ratings are found
+    if (!ratings || ratings.length === 0) {
+      return res.status(200).json({ ratings: [] });
+    }
+
+    res.status(200).json({ ratings });
+  } catch (error) {
+    console.error("Error fetching student ratings:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 app.listen(3001, () => {
