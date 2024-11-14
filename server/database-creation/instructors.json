@@ -1,0 +1,6 @@
+[
+    { "firstName": "Dr. Robert", "lastName": "Thompson", "email": "robert.thompson@instructor.com", "password": "password", "role": "instructor" },
+    { "firstName": "Dr. Linda", "lastName": "Anderson", "email": "linda.anderson@instructor.com", "password": "password", "role": "instructor" },
+    { "firstName": "Dr. Thomas", "lastName": "Jackson", "email": "thomas.jackson@instructor.com", "password": "password", "role": "instructor" }
+  ]
+  
