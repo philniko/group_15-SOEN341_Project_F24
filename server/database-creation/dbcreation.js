@@ -7,7 +7,9 @@ const baseURL = "http://localhost:3001";
   try {
     // Step 1: Load users from JSON files
     const students = JSON.parse(fs.readFileSync("./students.json", "utf-8"));
-    const instructors = JSON.parse(fs.readFileSync("./instructors.json", "utf-8"));
+    const instructors = JSON.parse(
+      fs.readFileSync("./instructors.json", "utf-8")
+    );
 
     const users = [...students, ...instructors];
     const userTokens = {};
@@ -27,7 +29,10 @@ const baseURL = "http://localhost:3001";
         userTokens[user.email] = loginResponse.data.token;
         console.log(`Logged in: ${user.email}`);
       } catch (error) {
-        console.error(`Error with ${user.email}:`, error.response?.data || error.message);
+        console.error(
+          `Error with ${user.email}:`,
+          error.response?.data || error.message
+        );
       }
     }
 
@@ -41,15 +46,22 @@ const baseURL = "http://localhost:3001";
       let groupIndex = 0;
 
       while (groupIndex < students.length) {
-        const groupStudents = students.slice(groupIndex, groupIndex + groupSize);
+        const groupStudents = students.slice(
+          groupIndex,
+          groupIndex + groupSize
+        );
 
         // Update group name to include instructor's email
-        const groupName = `${instructor.email}'s Group ${Math.ceil((groupIndex + 1) / groupSize)}`;
+        const groupName = `${instructor.email}'s Group ${Math.ceil(
+          (groupIndex + 1) / groupSize
+        )}`;
 
         if (groupStudents.length === 0) {
           console.warn(`No students found for ${groupName}`);
         } else {
-          console.log(`Assigning ${groupStudents.length} students to ${groupName}`);
+          console.log(
+            `Assigning ${groupStudents.length} students to ${groupName}`
+          );
         }
 
         try {
@@ -73,7 +85,9 @@ const baseURL = "http://localhost:3001";
               { groupId, userEmail: student.email },
               { headers: { "x-access-token": token } }
             );
-            console.log(`Added student ${student.email} to group: ${groupName}`);
+            console.log(
+              `Added student ${student.email} to group: ${groupName}`
+            );
           }
         } catch (error) {
           console.error(
@@ -102,9 +116,21 @@ const baseURL = "http://localhost:3001";
 
         if (!group || !group.students || group.students.length < 2) continue;
 
+        // Find the student's own ID from the group students
+        const selfStudent = group.students.find(
+          (s) => s.email === student.email
+        );
+        if (!selfStudent) {
+          console.error(`Student ${student.email} not found in their group`);
+          continue;
+        }
+
+        const studentId = selfStudent._id;
+
         // Add ratings to other students in the same group
         for (const ratee of group.students) {
-          if (ratee._id === student._id) continue;
+          // Convert IDs to strings before comparing
+          if (ratee._id.toString() === studentId.toString()) continue;
 
           const ratingPayload = {
             rateeId: ratee._id,
