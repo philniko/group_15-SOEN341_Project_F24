@@ -27,7 +27,7 @@
     { "firstName": "Grace", "lastName": "Carter", "email": "grace.carter@student.com", "password": "password", "role": "student" },
     { "firstName": "Andrew", "lastName": "Mitchell", "email": "andrew.mitchell@student.com", "password": "password", "role": "student" },
     { "firstName": "Chloe", "lastName": "Perez", "email": "chloe.perez@student.com", "password": "password", "role": "student" },
-    { "firstName": "Ethan", "lastName": "Roberts", "email": "ethan.roberts@student.com", "password": "password", "role": "student" },
+    { "firstName": "Lamar", "lastName": "Jackson", "email": "lamar.jackson@student.com", "password": "password", "role": "student" },
     { "firstName": "Ella", "lastName": "Turner", "email": "ella.turner@student.com", "password": "password", "role": "student" }
   ]
   
