@@ -31,16 +31,23 @@ After every student in a given team has submitted their evaluation, the instruct
 To run the application locally:
 
 1. Navigate to the **client** folder and run:
-   ```bash
-   npm install
-   npm run dev
-   ```
+    ```bash
+    npm install
+    npm run dev
+    ```
 2. Navigate to the **server** folder and run:
-   ```bash
-   npm install
-   npm start
-   ```
+    ```bash
+    npm install
+    npm start
+    ```
 3. Ensure you have a **MongoDB** database running on your machine with port **27017** (default MongoDB port). If MongoDB is not installed, you can download it from the [MongoDB Download Center](https://www.mongodb.com/try/download/community).
+
+4. For test data, populate the database by navigating to the **database-creation** folder and running:
+    ```bash
+    npm install
+    node dbcreation.js
+    ```
+Please note, the password of all users from this script is: **password**.
 
 ### Application Usage
 
