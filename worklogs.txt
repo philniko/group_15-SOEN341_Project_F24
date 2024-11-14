@@ -1,0 +1,8 @@
+Sprint 3 Log:
+
+Philippe Nikolov (40245641):
+
+- Worked on Detailed View page
+- Tweak Summary of Results page
+- DB creation script
+- Some other bugfixes, minor changes, refinements
