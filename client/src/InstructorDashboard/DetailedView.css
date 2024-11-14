@@ -1,0 +1,87 @@
+/* DetailedView.css */
+
+.detailed-view {
+    padding-top: 76px; /* Adjust if necessary based on navbar height */
+  }
+  
+  /* Adjust the heading styles */
+  .detailed-view h2,
+  .detailed-view h3 {
+    font-weight: 600;
+    color: #343a40;
+    border-bottom: 2px solid #dee2e6;
+    padding-bottom: 10px;
+    margin-bottom: 20px;
+  }
+  
+  /* Student info styling */
+  .student-info p {
+    margin-bottom: 5px;
+  }
+  
+  /* Table styling */
+  .table {
+    margin-bottom: 40px;
+    background-color: transparent;
+  }
+  
+  .table thead th {
+    background-color: #f8f9fa;
+    color: #495057;
+  }
+  
+  .table th,
+  .table td {
+    vertical-align: middle;
+    text-align: center;
+  }
+  
+  /* Comment card styling */
+  .comment-card {
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+  }
+  
+  .comment-card .card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  .comment-card .card-title {
+    font-size: 1.1em;
+    margin-bottom: 0;
+    color: #343a40;
+  }
+  
+  .comment-card .list-group-item {
+    border: none;
+    padding-left: 0;
+    padding-right: 0;
+    background-color: transparent;
+  }
+  
+  .comment-card .list-group-item:not(:last-child) {
+    border-bottom: 1px solid #dee2e6;
+  }
+  
+  /* Remove hover effect on the page */
+  .detailed-view:hover {
+    transform: none;
+  }
+  
+  /* Adjustments for smaller screens */
+  @media (max-width: 576px) {
+    .detailed-view {
+      padding-top: 90px; /* Adjust for smaller screens if navbar height differs */
+    }
+  
+    .table th,
+    .table td {
+      font-size: 0.9em;
+    }
+  
+    .comment-card .card-title {
+      font-size: 1em;
+    }
+  }
+  
