@@ -2,18 +2,14 @@ import axios from "axios";
 import fs from "fs";
 
 const baseURL = "http://localhost:3001";
-const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
 
 (async () => {
   try {
     // Step 1: Load users from JSON files
     const students = JSON.parse(fs.readFileSync("./students.json", "utf-8"));
-    const instructors = JSON.parse(
-      fs.readFileSync("./instructors.json", "utf-8")
-    );
+    const instructors = JSON.parse(fs.readFileSync("./instructors.json", "utf-8"));
 
     const users = [...students, ...instructors];
-
     const userTokens = {};
 
     // Step 2: Register users
@@ -24,7 +20,6 @@ const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
         console.log(`Registered: ${user.email}`);
 
         // Log in the user to get a token
-        console.log(user.email, user.password);
         const loginResponse = await axios.post(`${baseURL}/login`, {
           email: user.email,
           password: user.password,
@@ -32,10 +27,7 @@ const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
         userTokens[user.email] = loginResponse.data.token;
         console.log(`Logged in: ${user.email}`);
       } catch (error) {
-        console.error(
-          `Error with ${user.email}:`,
-          error.response?.data || error.message
-        );
+        console.error(`Error with ${user.email}:`, error.response?.data || error.message);
       }
     }
 
@@ -44,17 +36,24 @@ const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
       const token = userTokens[instructor.email];
       if (!token) continue;
 
-      const instructorGroups = [];
+      console.log(`Creating groups for instructor: ${instructor.email}`);
+      const groupSize = 5;
+      let groupIndex = 0;
 
-      // Divide students into groups of 5
-      for (let i = 0; i < students.length; i += 5) {
-        const groupStudents = students.slice(i, i + 5);
-        const groupName = `${instructor.firstName}'s Group ${Math.ceil(
-          (i + 1) / 5
-        )}`;
+      while (groupIndex < students.length) {
+        const groupStudents = students.slice(groupIndex, groupIndex + groupSize);
 
-        // Create group
+        // Update group name to include instructor's email
+        const groupName = `${instructor.email}'s Group ${Math.ceil((groupIndex + 1) / groupSize)}`;
+
+        if (groupStudents.length === 0) {
+          console.warn(`No students found for ${groupName}`);
+        } else {
+          console.log(`Assigning ${groupStudents.length} students to ${groupName}`);
+        }
+
         try {
+          // Create group
           const groupResponse = await axios.post(
             `${baseURL}/createGroup`,
             { name: groupName },
@@ -63,7 +62,6 @@ const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
           console.log(`Created group: ${groupName}`);
 
           const groupId = groupResponse.data._id;
-          instructorGroups.push(groupId);
 
           // Add students to the group
           for (const student of groupStudents) {
@@ -75,9 +73,7 @@ const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
               { groupId, userEmail: student.email },
               { headers: { "x-access-token": token } }
             );
-            console.log(
-              `Added student ${student.email} to group: ${groupName}`
-            );
+            console.log(`Added student ${student.email} to group: ${groupName}`);
           }
         } catch (error) {
           console.error(
@@ -85,6 +81,8 @@ const JWT_SECRET = "secret"; // Update with your actual JWT secret if needed
             error.response?.data || error.message
           );
         }
+
+        groupIndex += groupSize;
       }
     }
 
