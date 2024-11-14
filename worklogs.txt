@@ -6,3 +6,12 @@ Philippe Nikolov (40245641):
 - Tweak Summary of Results page
 - DB creation script
 - Some other bugfixes, minor changes, refinements
+
+Charles Partous (40175854):
+
+- Implemented removeGroup server method
+- Implemented removeStudent server method
+- Implemented changeGroupName server method
+- Added group removal feature to instructor dashboard frontend
+- Added student removal feature to instructor dashboard frontend
+- Added group name change feature to instructor dashboard frontend
