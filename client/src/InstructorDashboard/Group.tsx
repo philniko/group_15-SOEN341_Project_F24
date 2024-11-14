@@ -1,27 +1,30 @@
-import { useEffect, useRef, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect, useRef, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 function Group() {
-  const { id } = useParams();
+  const { groupId } = useParams();
   const studentEmailInput = useRef<HTMLInputElement>(null);
   const [studentEmail, setStudentEmail] = useState("");
-  const [students, setStudents] = useState<{ _id: string, firstName: string, lastName: string }[]>([]);
+  const [students, setStudents] = useState<
+    { _id: string; firstName: string; lastName: string }[]
+  >([]);
   const [messageType, setMessageType] = useState("");
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   // State for handling the confirmation modal
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<string | null>(null);
 
   const updateStudents = async () => {
-    const token = localStorage.getItem('token') || "";
+    const token = localStorage.getItem("token") || "";
     const response = await fetch("http://localhost:3001/getGroup", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-access-token": token
+        "x-access-token": token,
       },
-      body: JSON.stringify({ id: id })
+      body: JSON.stringify({ id: groupId}),
     });
 
     if (response.ok) {
@@ -40,9 +43,9 @@ function Group() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": token
+          "x-access-token": token,
         },
-        body: JSON.stringify({ groupId: id, userEmail: studentEmail })
+        body: JSON.stringify({ groupId: groupId, userEmail: studentEmail }),
       });
 
       if (response.ok) {
@@ -78,9 +81,9 @@ function Group() {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "x-access-token": token
+        "x-access-token": token,
       },
-      body: JSON.stringify({ groupId: id, studentId: studentToDelete })
+      body: JSON.stringify({ groupId: groupId, studentId: studentToDelete }),
     });
 
     if (response.ok) {
@@ -90,7 +93,9 @@ function Group() {
     } else {
       const data = await response.json();
       setMessageType("error");
-      setMessage(data.message || "An error occurred while removing the student.");
+      setMessage(
+        data.message || "An error occurred while removing the student."
+      );
     }
 
     // Close modal and reset state
@@ -100,51 +105,64 @@ function Group() {
 
   const confirmRemoveStudent = (studentId: string) => {
     setStudentToDelete(studentId); // Set the student to be removed
-    setShowConfirmModal(true);     // Show the confirmation modal
+    setShowConfirmModal(true); // Show the confirmation modal
   };
 
   return (
     <div className="home">
       <div className="container">
-        <div className='row border-bottom border-secondary pb-3 mb-3 align-items-center'>
-          <div className='col-5'>
-            Number of Students: {students.length}
-          </div>
-          <div className='col-7 text-end' id="create-btn">
+        <div className="row border-bottom border-secondary pb-3 mb-3 align-items-center">
+          <div className="col-5">Number of Students: {students.length}</div>
+          <div className="col-7 text-end" id="create-btn">
             <button onClick={() => addStudent()}>Add Student</button>
             <input
               ref={studentEmailInput}
               placeholder="Student Email"
-              onChange={(e) => { setStudentEmail(e.target.value) }}
-              className={messageType === "error" ? "border border-danger" : ""}>
-            </input>
-            <br /> {message === "" ? null : <small className={messageType === "error" ? "text-danger" : "text-success"}>{message}</small>}
+              onChange={(e) => {
+                setStudentEmail(e.target.value);
+              }}
+              className={messageType === "error" ? "border border-danger" : ""}
+            ></input>
+            <br />{" "}
+            {message === "" ? null : (
+              <small
+                className={
+                  messageType === "error" ? "text-danger" : "text-success"
+                }
+              >
+                {message}
+              </small>
+            )}
           </div>
         </div>
 
-        <div className='row'>
-          {students.map((student) =>
-            <div key={String(student._id)} className="col-12 mb-3">
+        <div className="row">
+          {students.map((student) => (
+            <div
+              key={String(student._id)}
+              className="col-12 mb-3"
+              onClick={() =>  navigate(`student/${student._id}`)}
+            >
               <div className="card">
                 {/* X button to delete the student */}
                 <button
                   className="card-close"
                   onClick={(event) => {
-                    event.stopPropagation();
+                    event.stopPropagation(); // Prevents the card's onClick from firing
                     confirmRemoveStudent(student._id);
                   }}
                 >
                   &times;
                 </button>
                 <div className="card-body">
-                  <h5 className="card-title">{student.firstName + " " + student.lastName}</h5>
-                  <p className="card-text">
-                    Overall Grade: {"TODO" /*TODO*/}
-                  </p>
+                  <h5 className="card-title">
+                    {student.firstName + " " + student.lastName}
+                  </h5>
+                  <p className="card-text">Overall Grade: {"TODO"}</p>
                 </div>
               </div>
             </div>
-          )}
+          ))}
         </div>
       </div>
       {/* Confirmation Modal */}
@@ -159,10 +177,12 @@ function Group() {
             </button>
             <h5>Confirm Removal</h5>
             <p>
-              Are you sure you want to remove this student from the group?
-              All ratings made by and given to this student will be lost!
+              Are you sure you want to remove this student from the group? All
+              ratings made by and given to this student will be lost!
             </p>
-            <button onClick={removeStudent} className="btn btn-danger">Confirm</button>
+            <button onClick={removeStudent} className="btn btn-danger">
+              Confirm
+            </button>
           </div>
         </div>
       )}
