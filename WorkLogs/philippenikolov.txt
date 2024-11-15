@@ -1,0 +1,15 @@
+Philippe Nikolov (40245641):
+
+SPRINT 3
+
+- Implemented Detailed View page:
+- Tweak Summary of Results page
+  - Adjust styling
+  - Add tab container to have all groups associated to instructor as tabs
+- Created a database creation script for testing/development purposes that populates the database with:
+  - 30 students and 3 instructors
+  - 6 groups of 5 students for each instructor
+  - grades for/from each student
+- Added overall grade to student cards in the "groups" page
+- Fixed bug where students can rate themselves
+- Updated README to be more detailed and add instructions to use
