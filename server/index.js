@@ -596,7 +596,9 @@ app.post("/getRating", verifyJWT, async (req, res) => {
 
 app.get("/getSummaryView", verifyJWT, async (req, res) => {
   try {
-    const groups = await GroupModel.find()
+    const instructorId = req.user.id; // Get the instructor's ID from the token
+
+    const groups = await GroupModel.find({ instructor: instructorId })
       .populate({
         path: "students",
         select: "email firstName lastName", // Get basic student info
@@ -608,6 +610,7 @@ app.get("/getSummaryView", verifyJWT, async (req, res) => {
 
     const studentSummaries = groups.flatMap((group) => {
       return group.students.map((student) => {
+        // ... (rest of your existing code)
         // Filter ratings where this student is the ratee
         const studentRatings = group.ratings.filter((rating) =>
           rating.ratee.equals(student._id)
@@ -657,6 +660,7 @@ app.get("/getSummaryView", verifyJWT, async (req, res) => {
         };
       });
     });
+
     res.status(200).json(studentSummaries);
   } catch (error) {
     console.error(error);
