@@ -39,11 +39,24 @@ const baseURL = "http://localhost:3001";
     // Step 3: Create groups for each instructor
     const totalStudents = students.length;
     const totalInstructors = instructors.length;
-    const studentsPerInstructor = Math.ceil(totalStudents / totalInstructors);
+
+    // Calculate base students per instructor and distribute extras
+    const baseStudentsPerInstructor = Math.floor(
+      totalStudents / totalInstructors
+    );
+    const extraStudents = totalStudents % totalInstructors;
+
+    // Shuffle students before distribution
+    function shuffleArray(array) {
+      return array.sort(() => Math.random() - 0.5);
+    }
+
+    const shuffledStudents = shuffleArray(students);
 
     let studentIndex = 0;
 
-    for (const instructor of instructors) {
+    for (let i = 0; i < instructors.length; i++) {
+      const instructor = instructors[i];
       const token = userTokens[instructor.email];
       if (!token) continue;
 
@@ -51,13 +64,21 @@ const baseURL = "http://localhost:3001";
       const groupSize = 5;
       let groupIndex = 0;
 
+      // Determine the number of students for this instructor
+      const numStudentsForInstructor =
+        baseStudentsPerInstructor + (i < extraStudents ? 1 : 0);
+
       // Get the subset of students for this instructor
-      const instructorStudents = students.slice(
+      const instructorStudents = shuffledStudents.slice(
         studentIndex,
-        studentIndex + studentsPerInstructor
+        studentIndex + numStudentsForInstructor
       );
 
-      studentIndex += studentsPerInstructor;
+      console.log(
+        `Instructor ${instructor.email} has ${instructorStudents.length} students assigned.`
+      );
+
+      studentIndex += numStudentsForInstructor;
 
       while (groupIndex < instructorStudents.length) {
         const groupStudents = instructorStudents.slice(
@@ -65,18 +86,13 @@ const baseURL = "http://localhost:3001";
           groupIndex + groupSize
         );
 
-        // Update group name to include instructor's email
-        const groupName = `${instructor.email}'s Group ${Math.ceil(
+        const groupName = `${instructor.firstName}'s Group ${Math.ceil(
           (groupIndex + 1) / groupSize
         )}`;
 
-        if (groupStudents.length === 0) {
-          console.warn(`No students found for ${groupName}`);
-        } else {
-          console.log(
-            `Assigning ${groupStudents.length} students to ${groupName}`
-          );
-        }
+        console.log(
+          `Assigning ${groupStudents.length} students to ${groupName}`
+        );
 
         try {
           // Create group
