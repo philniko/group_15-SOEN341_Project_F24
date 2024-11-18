@@ -46,6 +46,11 @@
     cursor: pointer;
 }
 
+.logout-button:hover {
+    color: #f0a500;
+    cursor: pointer;
+}
+
 .mobile-menu-icon {
     display: none; /* Hide the icon by default */
 }
