@@ -9,7 +9,11 @@ import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 
 const JWT_SECRET = "secret";
-const io = Server(3001);
+const io = new Server(3002, {
+  cors: {
+    origin: ["http://localhost:5173"]
+  }
+});
 // server/index.js
 
 // Middleware to verify JWT
@@ -42,9 +46,9 @@ function addMessageToDatabase(groupID, message) {
         group.messages = [];
       }
 
-      group.messages.append(message);
+      group.messages.push(message);
       group.save();
-      
+
     }).catch((err) => {
       console.log(err);
     });
@@ -54,10 +58,27 @@ io.on("connection", (socket) => {
   socket.on("join-room", (room) => {
     socket.join(room);
   });
-  socket.on("addMessage", (room, message) => {
+  socket.on("sendMessage", (room, message) => {
     addMessageToDatabase(room, message);
     socket.to(room).emit("receiveMessage", message);
   });
+});
+
+app.post("/getMessages", verifyJWT, (req, res) => {
+  const teamId = req.body.groupId;
+  GroupModel.findById(teamId)
+    .then(team => {
+      if (team.messages == null) {
+        res.status(200).json([]);
+      }
+      else {
+        res.status(200).json(team.messages);
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(400).json("Invalid Team");
+    })
 });
 
 // Handling register request

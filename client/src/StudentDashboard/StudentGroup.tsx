@@ -2,6 +2,10 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
+import { io } from "socket.io-client";
+
+//chat system
+const socket = io("http://localhost:3002");
 
 // Define a Student interface
 interface Student {
@@ -41,6 +45,17 @@ function StudentGroup() {
   const [conceptualGrade, setConceptualGrade] = useState(-1);
   const [practicalGrade, setPracticalGrade] = useState(-1);
   const [workEthicGrade, setWorkEthicGrade] = useState(-1);
+  const [messages, setMessages] = useState<String[]>([]);
+  const [message, setMessage] = useState<String>("");
+
+  //chat system
+  socket.on("connect", () => {
+    socket.emit("join-room", groupId);
+  });
+
+  socket.on("receiveMessage", (message) => {
+    setMessages([...messages, message]);
+  });
 
   // Update currentUserId whenever the token changes
   useEffect(() => {
@@ -51,6 +66,33 @@ function StudentGroup() {
 
   useEffect(() => {
   }, [groupId]);
+
+  function handleMessageSend() {
+    socket.emit("sendMessage", groupId, message);
+    setMessages([...messages, message]);
+  }
+
+  function fetchMessages() {
+    const getMessages = async () => {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:3001/getMessages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-access-token": token
+        },
+        body: JSON.stringify({ groupId: groupId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data);
+      }
+    }
+
+    getMessages();
+  }
 
   function fetchGrade() {
     const getGrade = async () => {
@@ -81,6 +123,7 @@ function StudentGroup() {
 
   useEffect(() => {
     fetchGrade();
+    fetchMessages();
   }, []);
 
   const fetchGroupData = async () => {
@@ -209,6 +252,15 @@ function StudentGroup() {
 
   return (
     <div className="home">
+    <div>
+      {messages.map((message, i) => 
+        <div key={i}>
+          {message}
+        </div>
+      )}
+      <input onChange={(e: any) => setMessage(e.target.value)} type="text"/>
+      <button onClick={() => handleMessageSend()}>SEND</button>
+    </div>
       <h2 className="groupNameTitle">{groupName}</h2>
       <table className="table">
         <thead>
