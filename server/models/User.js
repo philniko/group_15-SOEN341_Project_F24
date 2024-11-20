@@ -34,19 +34,18 @@ const UserSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Group'
     }]
+})
 
-    })
+//Hashing logic
+UserSchema.pre('save', async function (next) {
+    const user = this;
+    if (user.isModified('password')){
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(user.password, salt);
+    }
+    next();
+});
 
-    //Hashing logic
-    UserSchema.pre('save', async function (next) {
-        const user = this;
-        if (user.isModified('password')){
-            const salt = await bcrypt.genSalt(10);
-            user.password = await bcrypt.hash(user.password, salt);
-        }
-        next();
-    });
+const User = mongoose.model("User",UserSchema);
 
-    const User = mongoose.model("User",UserSchema);
-
-    export default User;
+export default User;

@@ -6,8 +6,10 @@ import GroupModel from "./models/Group.js";
 import RatingModel from "./models/Ratings.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Server } from "socket.io";
 
 const JWT_SECRET = "secret";
+const io = Server(3001);
 // server/index.js
 
 // Middleware to verify JWT
@@ -31,6 +33,32 @@ app.use(cors());
 
 //connect mongodb
 mongoose.connect("mongodb://localhost:27017/appDB");
+
+//chat system
+function addMessageToDatabase(groupID, message) {
+  GroupModel.findById(groupID)
+    .then((group) => {
+      if (!group.messages) {
+        group.messages = [];
+      }
+
+      group.messages.append(message);
+      group.save();
+      
+    }).catch((err) => {
+      console.log(err);
+    });
+}
+
+io.on("connection", (socket) => {
+  socket.on("join-room", (room) => {
+    socket.join(room);
+  });
+  socket.on("addMessage", (room, message) => {
+    addMessageToDatabase(room, message);
+    socket.to(room).emit("receiveMessage", message);
+  });
+});
 
 // Handling register request
 app.post("/register", async (req, res) => {
