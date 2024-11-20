@@ -21,8 +21,9 @@ const GroupSchema = new mongoose.Schema({
     ratings: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Ratings'
-    }]
+    }],
 
+    messages: [String]
 })
 
 const Group = mongoose.model('Group', GroupSchema);
