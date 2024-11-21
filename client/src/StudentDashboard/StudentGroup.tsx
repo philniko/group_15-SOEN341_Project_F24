@@ -1,5 +1,5 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
 import { io } from "socket.io-client";
@@ -27,6 +27,7 @@ function StudentGroup() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserName, setCurrentUserName] = useState("");
   const [ratings, setRatings] = useState({
     Cooperation: 0,
     ConceptualContribution: 0,
@@ -45,31 +46,32 @@ function StudentGroup() {
   const [conceptualGrade, setConceptualGrade] = useState(-1);
   const [practicalGrade, setPracticalGrade] = useState(-1);
   const [workEthicGrade, setWorkEthicGrade] = useState(-1);
-  const [messages, setMessages] = useState<String[]>([]);
-  const [message, setMessage] = useState<String>("");
-
-  //chat system
-  socket.on("connect", () => {
-    socket.emit("join-room", groupId);
-  });
-
-  socket.on("receiveMessage", (message) => {
-    setMessages([...messages, message]);
-  });
+  const [messages, setMessages] = useState<{sender:string, name:string, message:string}[]>([]);
+  const [message, setMessage] = useState<string>("");
+  const [showChat, setShowChat] = useState(false);
+  const chatInputRef = useRef<HTMLInputElement>(null);
 
   // Update currentUserId whenever the token changes
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const decoded = token ? jwtDecode<{ id: string }>(token) : null;
+    const decoded = token ? jwtDecode<{ id: string, firstName: string, lastName: string}>(token) : null;
     setCurrentUserId(decoded ? decoded.id : null);
+    setCurrentUserName(decoded ? (decoded.firstName + " " + decoded.lastName) : "");
   }, [localStorage.getItem("token")]); // Ensures re-running when token changes
 
   useEffect(() => {
   }, [groupId]);
 
   function handleMessageSend() {
-    socket.emit("sendMessage", groupId, message);
-    setMessages([...messages, message]);
+    if (message == "") {
+      return;
+    }
+    else if (chatInputRef.current) {
+      chatInputRef.current.value = "";
+      setMessage("");
+    }
+    socket.emit("sendMessage", currentUserId, currentUserName, groupId, message);
+    setMessages([...messages, {sender: currentUserId ? currentUserId : "", name: currentUserName, message: message}]);
   }
 
   function fetchMessages() {
@@ -92,6 +94,12 @@ function StudentGroup() {
     }
 
     getMessages();
+  }
+
+  function onKeyDown(e: any) {
+    if (e.key == "Enter") {
+      handleMessageSend();
+    }
   }
 
   function fetchGrade() {
@@ -125,6 +133,27 @@ function StudentGroup() {
     fetchGrade();
     fetchMessages();
   }, []);
+
+  //chat system
+  useEffect(() => {
+    const teamId = groupId;
+    socket.emit("join-room", teamId);
+    socket.on("receiveMessage", (user, name, message) => {
+      setMessages([...messages, {sender: user, name: name, message: message}]);
+    });
+
+    return () => {
+      socket.emit("leave-room", teamId);
+      socket.off("receiveMessage");
+    }
+  }, [groupId, setMessages]);
+
+  useEffect(() => {
+    if (showChat) {
+      document.addEventListener("keydown", onKeyDown);
+      return () => document.removeEventListener("keydown", onKeyDown);
+    }
+  }, [message, showChat]);
 
   const fetchGroupData = async () => {
     const token = localStorage.getItem('token') || '';
@@ -252,15 +281,6 @@ function StudentGroup() {
 
   return (
     <div className="home">
-    <div>
-      {messages.map((message, i) => 
-        <div key={i}>
-          {message}
-        </div>
-      )}
-      <input onChange={(e: any) => setMessage(e.target.value)} type="text"/>
-      <button onClick={() => handleMessageSend()}>SEND</button>
-    </div>
       <h2 className="groupNameTitle">{groupName}</h2>
       <table className="table">
         <thead>
@@ -414,6 +434,30 @@ function StudentGroup() {
           </div>
         }
       </div>
+      <div className="chat-button" onClick={() => setShowChat(true)}>
+        Chat
+      </div>
+      <Modal show={showChat} onHide={() => setShowChat(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>{groupName}'s Chat</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <div>
+          {messages.map((m, i) => 
+            <div key={i}>
+              {m.sender != currentUserId && (i == 0 || (messages[i - 1].sender != messages[i].sender)) && <div className="message-name mt-2 text-start">{m.name}</div>}
+              <div className={"mb-2" + (m.sender == currentUserId ? " text-end" : " text-start")}>
+                <span className={(m.sender == currentUserId ? "own-message" : "other-message")}>{m.message}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        </Modal.Body>
+        <Modal.Footer>
+            <input className="w-75" ref={chatInputRef} onChange={(e: any) => setMessage(e.target.value)} type="text"/>
+            <button onClick={() => handleMessageSend()}>SEND</button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
