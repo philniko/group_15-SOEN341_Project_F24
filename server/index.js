@@ -39,14 +39,14 @@ app.use(cors());
 mongoose.connect("mongodb://localhost:27017/appDB");
 
 //chat system
-function addMessageToDatabase(groupID, message) {
+function addMessageToDatabase(user, name, groupID, message) {
   GroupModel.findById(groupID)
     .then((group) => {
       if (!group.messages) {
         group.messages = [];
       }
 
-      group.messages.push(message);
+      group.messages.push({sender: user, name: name, message: message});
       group.save();
 
     }).catch((err) => {
@@ -58,9 +58,12 @@ io.on("connection", (socket) => {
   socket.on("join-room", (room) => {
     socket.join(room);
   });
-  socket.on("sendMessage", (room, message) => {
-    addMessageToDatabase(room, message);
-    socket.to(room).emit("receiveMessage", message);
+  socket.on("leave-room", (room) => {
+    socket.leave(room);
+  });
+  socket.on("sendMessage", (user, name, room, message) => {
+    addMessageToDatabase(user, name, room, message);
+    socket.to(room).emit("receiveMessage", user, name, message);
   });
 });
 
