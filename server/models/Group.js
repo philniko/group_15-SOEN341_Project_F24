@@ -23,7 +23,11 @@ const GroupSchema = new mongoose.Schema({
         ref: 'Ratings'
     }],
 
-    messages: [String]
+    messages: [{
+        sender: String,
+        name: String,
+        message: String
+    }]
 })
 
 const Group = mongoose.model('Group', GroupSchema);
