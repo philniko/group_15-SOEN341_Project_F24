@@ -23,11 +23,11 @@ const GroupSchema = new mongoose.Schema({
         ref: 'Ratings'
     }],
 
-    course: [{
+    course: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
         required: false
-    }]
+    }
 
 })
 
