@@ -6,8 +6,14 @@ import GroupModel from "./models/Group.js";
 import RatingModel from "./models/Ratings.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { Server } from "socket.io";
 
 const JWT_SECRET = "secret";
+const io = new Server(3002, {
+  cors: {
+    origin: ["http://localhost:5173"]
+  }
+});
 // server/index.js
 
 // Middleware to verify JWT
@@ -31,6 +37,52 @@ app.use(cors());
 
 //connect mongodb
 mongoose.connect("mongodb://localhost:27017/appDB");
+
+//chat system
+function addMessageToDatabase(user, name, groupID, message) {
+  GroupModel.findById(groupID)
+    .then((group) => {
+      if (!group.messages) {
+        group.messages = [];
+      }
+
+      group.messages.push({sender: user, name: name, message: message});
+      group.save();
+
+    }).catch((err) => {
+      console.log(err);
+    });
+}
+
+io.on("connection", (socket) => {
+  socket.on("join-room", (room) => {
+    socket.join(room);
+  });
+  socket.on("leave-room", (room) => {
+    socket.leave(room);
+  });
+  socket.on("sendMessage", (user, name, room, message) => {
+    addMessageToDatabase(user, name, room, message);
+    socket.to(room).emit("receiveMessage", user, name, message);
+  });
+});
+
+app.post("/getMessages", verifyJWT, (req, res) => {
+  const teamId = req.body.groupId;
+  GroupModel.findById(teamId)
+    .then(team => {
+      if (team.messages == null) {
+        res.status(200).json([]);
+      }
+      else {
+        res.status(200).json(team.messages);
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      res.status(400).json("Invalid Team");
+    })
+});
 
 // Handling register request
 app.post("/register", async (req, res) => {

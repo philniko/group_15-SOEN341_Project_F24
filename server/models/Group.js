@@ -27,8 +27,13 @@ const GroupSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course',
         required: false
-    }]
+    }],
 
+    messages: [{
+        sender: String,
+        name: String,
+        message: String
+    }]
 })
 
 const Group = mongoose.model('Group', GroupSchema);
