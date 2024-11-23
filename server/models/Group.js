@@ -21,6 +21,12 @@ const GroupSchema = new mongoose.Schema({
     ratings: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Ratings'
+    }],
+
+    course: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: false
     }]
 
 })
