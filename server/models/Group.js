@@ -23,6 +23,12 @@ const GroupSchema = new mongoose.Schema({
         ref: 'Ratings'
     }],
 
+    course: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: false
+    }],
+
     messages: [{
         sender: String,
         name: String,

@@ -41,7 +41,7 @@
 
 .nav-text a {
     text-decoration: none;
-    color: #f5f5f5 ;
+    color: #f5f5f5;
     font-size: 18px;
     width: 95%;
     height: 100%;
@@ -81,7 +81,7 @@ span {
     font-family: 'Lato', sans-serif;
 }
 
-.home{
+.home {
     position: relative;
     top: 100px;
     height: auto;
@@ -198,7 +198,7 @@ span {
     justify-content: space-between;
 }
 
-.rating-section > div {
+.rating-section>div {
     flex: 1 1 300px;
     background-color: #ffffff;
     border-radius: 6px;
@@ -252,12 +252,12 @@ span {
     color: #1a83ff;
 }
 
-.rating-section input[type="radio"]:checked + label {
+.rating-section input[type="radio"]:checked+label {
     color: #1a83ff;
     font-weight: bold;
 }
 
-.rating-section input[type="radio"]:focus + label {
+.rating-section input[type="radio"]:focus+label {
     color: #1a83ff;
     outline: 2px solid #1a83ff;
 }
@@ -271,13 +271,13 @@ span {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-  }
-  
-  .btn-rated:hover {
+}
+
+.btn-rated:hover {
     background-color: #218838;
-  }
-  
-  .btn-not-rated {
+}
+
+.btn-not-rated {
     background-color: #ff1a1a;
     color: white;
     border: none;
@@ -285,11 +285,11 @@ span {
     border-radius: 4px;
     cursor: pointer;
     transition: background-color 0.3s ease;
-  }
-  
-  .btn-not-rated:hover {
+}
+
+.btn-not-rated:hover {
     background-color: #ff1a1a;
-  }
+}
 
 .grades {
     text-align: center;
@@ -342,4 +342,11 @@ span {
     border-radius: 5px;
     background-color: #b4b4bc;
     padding: 10px;
+}
+
+.grades-chart {
+    max-width: 600px;
+    margin: 0 auto;
+    padding-top: 20px;
+    padding-bottom: 20px;
 }
