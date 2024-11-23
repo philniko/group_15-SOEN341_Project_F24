@@ -113,7 +113,7 @@ function SummaryView() {
         <table>
           <thead>
             <tr>
-              {['StudentID', 'First Name', 'Last Name', 'Team', 'Cooperation', 'Conceptual Contribution', 'Practical Contribution', 'Work Ethic', 'Average', 'Peers who responded'].map((col) => (
+              {['Student Email', 'First Name', 'Last Name', 'Team', 'Cooperation', 'Conceptual Contribution', 'Practical Contribution', 'Work Ethic', 'Average', 'Peers who responded'].map((col) => (
                 <th key={col}>{col}</th>
               ))}
             </tr>
