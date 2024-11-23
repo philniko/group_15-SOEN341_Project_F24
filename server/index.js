@@ -744,6 +744,51 @@ app.post("/getStudentRatings", verifyJWT, async (req, res) => {
   }
 });
 
+app.post("/setCourse", verifyJWT, async (req, res) => {
+  const userId = req.user.id; // Instructor's ID from JWT
+  const { groupId, courseId } = req.body; // Group ID and Course ID from the request
+
+  try {
+      const group = await GroupModel.findById(groupId);
+
+      if (!group) {
+          return res.status(404).json({ message: "Group not found" });
+      }
+
+      if (group.instructor.toString() !== userId) {
+          return res
+              .status(403)
+              .json({ message: "Only the instructor can update the course" });
+      }
+
+      group.course = courseId; // Overwrites the existing course
+      await group.save();
+
+      res.status(200).json({ message: "Course added successfully", group });
+  } catch (error) {
+      console.error("Error in /setCourse:", error);
+      res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/getCourse", verifyJWT, async (req, res) => {
+  const { groupId } = req.body; // Group ID from the request
+
+  try {
+    // Find the group by ID and populate the course details if it references another model
+    const group = await GroupModel.findById(groupId).populate("course");
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    res.status(200).json({ course: group.course });
+  } catch (error) {
+    console.error("Error in /getCourse:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 app.listen(3001, () => {
   console.log("Server is running on port 3001");
 });
