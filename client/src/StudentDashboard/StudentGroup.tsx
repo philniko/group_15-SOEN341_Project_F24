@@ -2,6 +2,7 @@ import { useParams } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
+import GradeChart from './GradeChart';
 import { io } from "socket.io-client";
 
 //chat system
@@ -458,6 +459,20 @@ function StudentGroup() {
             <button onClick={() => handleMessageSend()}>SEND</button>
         </Modal.Footer>
       </Modal>
+      {/* Chart Component */}
+      {existGrade && (
+        <div className="grades-chart">
+          <GradeChart
+            grades={{
+              cooperation: cooperationGrade,
+              conceptual: conceptualGrade,
+              practical: practicalGrade,
+              workEthic: workEthicGrade,
+              total: totalGrade
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
