@@ -29,6 +29,11 @@ const GroupSchema = new mongoose.Schema({
         required: false
     }
 
+    messages: [{
+        sender: String,
+        name: String,
+        message: String
+    }]
 })
 
 const Group = mongoose.model('Group', GroupSchema);
