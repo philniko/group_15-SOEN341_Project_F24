@@ -305,6 +305,45 @@ span {
     text-align: center;
 }
 
+.chat-button {
+    position: fixed;
+    bottom: 10px;
+    right: 20px;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px solid black;
+}
+
+.chat-button:hover {
+    cursor: pointer;
+    color: #1a83ff;
+    border-color: #1a83ff;
+}
+
+.message-name {
+    font-size: 13px;
+    margin-left: 20px;
+}
+
+.own-message {
+    display: inline-block;
+    text-align: right;
+    max-width: 75%;
+    border-radius: 5px;
+    color: white;
+    background-color: #2294fb;
+    padding: 10px;
+}
+
+.other-message {
+    display: inline-block;
+    text-align: left;
+    max-width: 75%;
+    border-radius: 5px;
+    background-color: #b4b4bc;
+    padding: 10px;
+}
+
 .grades-chart {
     max-width: 600px;
     margin: 0 auto;
