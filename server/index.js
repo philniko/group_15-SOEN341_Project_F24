@@ -4,6 +4,7 @@ import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
 import RatingModel from "./models/Ratings.js";
+import MessageModel from "./models/Message.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
@@ -12,7 +13,7 @@ const JWT_SECRET = "secret";
 const io = new Server(3002, {
   cors: {
     origin: ["http://localhost:5173"]
-  }
+  },
 });
 // server/index.js
 
@@ -46,10 +47,10 @@ function addMessageToDatabase(user, name, groupID, message) {
         group.messages = [];
       }
 
-      group.messages.push({sender: user, name: name, message: message});
+      group.messages.push({ sender: user, name: name, message: message });
       group.save();
-
-    }).catch((err) => {
+    })
+    .catch((err) => {
       console.log(err);
     });
 }
@@ -65,23 +66,142 @@ io.on("connection", (socket) => {
     addMessageToDatabase(user, name, room, message);
     socket.to(room).emit("receiveMessage", user, name, message);
   });
+
+  // Join a specific user's private room for direct messages
+  socket.on("join-user", (userId) => {
+    socket.join(userId); // Join a room named after the user's ID
+  });
+
+  socket.on("sendPrivateMessage", (data) => {
+    const { sender, recipient, message } = data;
+
+    // Save the message to the database
+    const newMessage = new MessageModel({ sender, recipient, message });
+    newMessage
+      .save()
+      .catch((err) => console.error("Error saving message:", err));
+
+    // Emit the message to the recipient's room
+    io.to(recipient).emit("receivePrivateMessage", {
+      sender,
+      message,
+      timestamp: new Date(),
+    });
+  });
+});
+
+app.get("/getContacts", verifyJWT, async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    // Find groups where the user is a member
+    const groups = await GroupModel.find({ students: userId }).populate(
+      "students",
+      "firstName lastName email"
+    );
+
+    // Collect all unique contacts from those groups
+    const contacts = new Set();
+    groups.forEach((group) => {
+      group.students.forEach((student) => {
+        if (student._id.toString() !== userId) {
+          contacts.add(student);
+        }
+      });
+    });
+
+    res.status(200).json({ contacts: Array.from(contacts) });
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+app.post("/sendPrivateMessage", verifyJWT, async (req, res) => {
+  const sender = req.user.id; // Authenticated user's ID
+  const { recipient, message } = req.body; // Recipient ID and message text
+
+  try {
+    // Validate input
+    if (!recipient || !message) {
+      return res
+        .status(400)
+        .json({ message: "Recipient and message are required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(recipient)) {
+      return res.status(400).json({ message: "Invalid recipient ID" });
+    }
+
+    // Save the message to the database
+    const newMessage = new MessageModel({
+      sender,
+      recipient,
+      message,
+    });
+
+    await newMessage.save();
+
+    // Emit the message to the recipient's private room via Socket.IO
+    io.to(recipient).emit("receivePrivateMessage", {
+      sender,
+      message,
+      timestamp: new Date(),
+    });
+
+    res.status(201).json({ message: "Message sent successfully" });
+  } catch (error) {
+    console.error("Error sending private message:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
+});
+
+app.post("/getPrivateMessages", verifyJWT, async (req, res) => {
+  const userId = req.user.id; // Authenticated user's ID
+  const { contactId } = req.body; // Contact ID
+
+  console.log("Fetching messages for:", { userId, contactId });
+
+  try {
+    // Validate IDs
+    if (
+      !mongoose.Types.ObjectId.isValid(userId) ||
+      !mongoose.Types.ObjectId.isValid(contactId)
+    ) {
+      return res.status(400).json({ message: "Invalid user or contact ID" });
+    }
+
+    // Fetch messages between the user and the contact
+    const messages = await MessageModel.find({
+      $or: [
+        { sender: userId, recipient: contactId },
+        { sender: contactId, recipient: userId },
+      ],
+    }).sort({ timestamp: 1 });
+
+    console.log("Fetched messages:", messages);
+
+    res.status(200).json({ messages });
+  } catch (error) {
+    console.error("Error fetching private messages:", error.message);
+    res.status(500).json({ message: "Server error", error: error.message });
+  }
 });
 
 app.post("/getMessages", verifyJWT, (req, res) => {
   const teamId = req.body.groupId;
   GroupModel.findById(teamId)
-    .then(team => {
+    .then((team) => {
       if (team.messages == null) {
         res.status(200).json([]);
-      }
-      else {
+      } else {
         res.status(200).json(team.messages);
       }
     })
-    .catch(err => {
+    .catch((err) => {
       console.log(err);
       res.status(400).json("Invalid Team");
-    })
+    });
 });
 
 // Handling register request

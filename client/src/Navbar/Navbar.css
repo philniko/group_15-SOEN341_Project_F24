@@ -1,83 +1,109 @@
 /* Navbar Styling */
 .navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #0d1b2a;
-    padding: 1rem;
-    position: fixed;
-    top: 0;
-    width: 100%;
-    z-index: 10;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #0d1b2a;
+  padding: 1rem;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  z-index: 10;
 }
 
 .logo {
-    color: white;
-    font-size: 1.5rem;
+  color: white;
+  font-size: 1.5rem;
 }
 
 .nav-center {
-    display: flex;
-    gap: 1.5rem;
-    justify-content: center;
-    flex: 1; /* Center the navigation links */
-    list-style: none;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  flex: 1; /* Center the navigation links */
+  list-style: none;
 }
 
-.nav-links li, .nav-center li {
-    list-style: none;
+.nav-links li,
+.nav-center li {
+  list-style: none;
 }
 
-.nav-links a, .nav-center a {
-    text-decoration: none;
-    color: white;
-    font-size: 1.2rem;
+.nav-links a,
+.nav-center a {
+  text-decoration: none;
+  color: white;
+  font-size: 1.2rem;
 }
 
-.nav-links a:hover, .nav-center a:hover {
-    color: #f0a500;
+.nav-links a:hover,
+.nav-center a:hover {
+  color: #f0a500;
+}
+
+/* Actions Section */
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
 }
 
 .logout-button {
-    color: white;
-    font-size: 1.2rem;
-    background: none;
-    border: none;
-    cursor: pointer;
+  color: white;
+  font-size: 1.2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
 }
 
 .logout-button:hover {
-    color: #f0a500;
-    cursor: pointer;
+  color: #f0a500;
+  cursor: pointer;
 }
 
+/* Chat Icon Button */
+.chat-icon-button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.8rem; /* Slightly larger for visibility */
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.chat-icon-button:hover {
+  color: #f0a500;
+}
+
+/* Mobile Menu Icon */
 .mobile-menu-icon {
-    display: none; /* Hide the icon by default */
+  display: none; /* Hide the icon by default */
 }
 
 /* Mobile View */
 @media (max-width: 768px) {
-    .nav-center {
-        display: none;
-        flex-direction: column;
-        background-color: #0d1b2a;
-        position: absolute;
-        top: 60px;
-        right: 0;
-        width: 100%;
-        height: 100vh;
-        align-items: center;
-        justify-content: center;
-    }
-    
-    .nav-links-mobile {
-        display: flex;
-    }
-    
-    .mobile-menu-icon {
-        display: block;
-        color: white;
-        font-size: 2rem;
-        cursor: pointer;
-    }
+  .nav-center {
+    display: none;
+    flex-direction: column;
+    background-color: #0d1b2a;
+    position: absolute;
+    top: 60px;
+    right: 0;
+    width: 100%;
+    height: 100vh;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .nav-links-mobile {
+    display: flex;
+  }
+
+  .mobile-menu-icon {
+    display: block;
+    color: white;
+    font-size: 2rem;
+    cursor: pointer;
+  }
 }
