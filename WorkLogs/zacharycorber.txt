@@ -1,9 +1,14 @@
 Zachary Corber 40246724
 
-Sprint 3
-
+Sprint 3:
 - Added styling for student dashboard page, groups page and rate students form
 - Added styling for instructor dashboard page, groups page and summary of results page
 - Fixed bug where students can rate themselves (removed the button for current logged in user)
 - Fixed bugs with firstName, lastName around the website and added group name to groups page
 - Styled a section in student groups page to display the students grade received for each topic
+
+Sprint 4:
+- Fixed some bugs in the the code that wasn't allowing the server to running
+- Added graphs for each student to see their grades as an alternative to just seeing numbers
+- Added additional styling to the student groups page to fit with the graphs and the chat button
+- Improved styling on the students group chat system with improved functionality as well
