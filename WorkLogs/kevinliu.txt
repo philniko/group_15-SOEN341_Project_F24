@@ -1,8 +1,17 @@
 Kevin Liu (40281197):
 
 SPRINT 1:
+-Implemented the backend for the login and register actions (along with Philippe and Omar)
+-Implemented the user schema (along with Philippe and Omar)
+-Implemented password hashing (along with Philippe and Omar)
 
 SPRINT 2:
+-Implemented the instructor group front-end component
+-Ensured that the instructor is directed to the right dashboard upon login
+-Allowed the instructor to create a new group
+-Allowed the instructor to view all the groups they have created
+-Added error messages (visble to the user) for all input spaces
+-Added acceptance tests
 
 SPRINT 3:
 -Implemented the student grade view
