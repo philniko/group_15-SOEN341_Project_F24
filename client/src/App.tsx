@@ -23,7 +23,7 @@ const ProtectedRoute = ({ element: Component, requiredRole, ...rest }: any) => {
 
   let userRole;
   try {
-    const decodedToken = jwtDecode(token);
+    const decodedToken = jwtDecode<{role: string}>(token);
     userRole = decodedToken.role;
   } catch (e) {
     console.log(e);
