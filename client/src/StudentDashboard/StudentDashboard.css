@@ -307,41 +307,72 @@ span {
 
 .chat-button {
     position: fixed;
-    bottom: 10px;
+    bottom: 20px;
     right: 20px;
-    padding: 5px;
-    border-radius: 5px;
-    border: 1px solid black;
+    padding: 10px 15px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #0078d4;
+    border-radius: 50px;
+    border: none;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
 }
 
 .chat-button:hover {
     cursor: pointer;
-    color: #1a83ff;
-    border-color: #1a83ff;
+    background-color: #005bb5;
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
 }
 
 .message-name {
-    font-size: 13px;
-    margin-left: 20px;
+    font-size: 14px;
+    margin-left: 10px;
+    font-weight: bold;
+    color: #555;
 }
 
 .own-message {
     display: inline-block;
     text-align: right;
-    max-width: 75%;
-    border-radius: 5px;
+    max-width: 70%;
+    border-radius: 12px;
     color: white;
-    background-color: #2294fb;
-    padding: 10px;
+    background-color: #2196f3;
+    padding: 12px 15px;
+    margin: 5px 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .other-message {
     display: inline-block;
     text-align: left;
-    max-width: 75%;
+    max-width: 70%;
+    border-radius: 12px;
+    background-color: #e0e0e0;
+    padding: 12px 15px;
+    margin: 5px 0;
+    color: #333;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.send-btn {
+    padding: 6px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    color: white;
+    background-color: #0078d4;
+    border: none;
     border-radius: 5px;
-    background-color: #b4b4bc;
-    padding: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.send-btn:hover {
+    background-color: #005bb5;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
 }
 
 .grades-chart {
