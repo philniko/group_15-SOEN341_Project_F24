@@ -18,8 +18,8 @@ interface Student {
 }
 
 // Decode the token to get the current user's ID
-const token = localStorage.getItem("token");
-const currentUserId = token ? (jwtDecode(token)).id : null;
+//const token = localStorage.getItem("token");
+//const currentUserId = token ? (jwtDecode(token)).id : null;
 
 function StudentGroup() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -83,7 +83,7 @@ function StudentGroup() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": token
+          ...(token ? {"x-access-token": token} : {})
         },
         body: JSON.stringify({ groupId: groupId })
       });
@@ -111,7 +111,7 @@ function StudentGroup() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": token
+          ...(token ? {"x-access-token": token} : {})
         },
         body: JSON.stringify({ groupId: groupId })
       });
