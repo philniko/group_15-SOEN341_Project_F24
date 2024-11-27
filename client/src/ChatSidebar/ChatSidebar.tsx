@@ -4,11 +4,18 @@ import "./ChatSidebar.css";
 import { useUser } from "../hooks/UseUser";
 import "bootstrap-icons/font/bootstrap-icons.css";
 
-const ChatSidebar = ({ isOpen, onClose }) => {
+type contact = {
+  _id: string,
+  firstName: string,
+  lastName: string,
+  email: string
+}
+
+const ChatSidebar = ({ isOpen, onClose }: {isOpen: boolean, onClose: () => void}) => {
   const user = useUser(); // Get the current user's data
   const [contacts, setContacts] = useState([]); // List of contacts
-  const [selectedContact, setSelectedContact] = useState(null); // Selected contact
-  const [messages, setMessages] = useState([]); // Chat messages
+  const [selectedContact, setSelectedContact] = useState<contact | null>(null); // Selected contact
+  const [messages, setMessages] = useState<any[]>([]); // Chat messages
   const [newMessage, setNewMessage] = useState(""); // Input for the new message
 
   // Fetch contacts from the API
@@ -26,7 +33,7 @@ const ChatSidebar = ({ isOpen, onClose }) => {
   };
 
   // Fetch messages for the selected contact
-  const fetchMessages = async (contactId) => {
+  const fetchMessages = async (contactId: string) => {
     try {
       const token = localStorage.getItem("token");
       const response = await axios.post(
@@ -46,6 +53,10 @@ const ChatSidebar = ({ isOpen, onClose }) => {
     if (!newMessage.trim()) return; // Ignore empty messages
 
     try {
+      if (!selectedContact) {
+        throw new Error();
+      }
+
       const token = localStorage.getItem("token");
       const userId = user.id; // Get the current user's ID
       const message = {
@@ -136,7 +147,7 @@ const ChatSidebar = ({ isOpen, onClose }) => {
             </button>
           </div>
           <ul>
-            {contacts.map((contact) => (
+            {contacts.map((contact: contact) => (
               <li
                 key={contact._id}
                 onClick={() => {
