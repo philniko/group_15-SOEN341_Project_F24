@@ -3,6 +3,18 @@ import { useEffect, useState } from "react";
 import "./DetailedView.css";
 import { Card, ListGroup, Table } from "react-bootstrap";
 
+type ratingType = {
+  CooperationRating: number,
+  ConceptualContributionRating: number,
+  PracticalContributionRating: number,
+  WorkEthicRating: number
+  CooperationFeedback: string,
+  ConceptualContributionFeedback: string,
+  PracticalContributionFeedback: string,
+  WorkEthicFeedback: string,
+  rater: {firstName: string, lastName: string}
+}
+
 function DetailedView() {
   const { groupId, studentId } = useParams();
   const [teamName, setTeamName] = useState("");
@@ -32,7 +44,7 @@ function DetailedView() {
           setTeamName(group.name);
 
           // Find the student in the group
-          student = group.students.find((s) => s._id === studentId);
+          student = group.students.find((s: {_id: string}) => s._id === studentId);
 
           if (student) {
             setStudentName(`${student.firstName} ${student.lastName}`);
@@ -100,7 +112,7 @@ function DetailedView() {
         </thead>
         <tbody>
           {ratings.length > 0 ? (
-            ratings.map((rating, index) => {
+            ratings.map((rating: ratingType, index) => {
               const average =
                 (rating.CooperationRating +
                   rating.ConceptualContributionRating +
@@ -121,7 +133,7 @@ function DetailedView() {
             })
           ) : (
             <tr>
-              <td colSpan="6">No ratings available.</td>
+              <td colSpan={6}>No ratings available.</td>
             </tr>
           )}
         </tbody>
@@ -130,7 +142,7 @@ function DetailedView() {
       {/* Comments Section */}
       <h3 className="mb-4">Comments</h3>
       {ratings.length > 0 ? (
-        ratings.map((rating, index) => (
+        ratings.map((rating: ratingType, index) => (
           <Card key={index} className="mb-3 comment-card">
             <Card.Header>
               <h5 className="mb-0">{`${rating.rater.firstName} ${rating.rater.lastName}`}</h5>
