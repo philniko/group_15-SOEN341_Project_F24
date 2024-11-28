@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import UserModel from "./models/User.js";
 import GroupModel from "./models/Group.js";
+import CourseModel from "./models/Course.js";
 import RatingModel from "./models/Ratings.js";
 import MessageModel from "./models/Message.js";
 import bcrypt from "bcrypt";
@@ -12,7 +13,7 @@ import { Server } from "socket.io";
 const JWT_SECRET = "secret";
 const io = new Server(3002, {
   cors: {
-    origin: ["http://localhost:5173"]
+    origin: ["http://localhost:5173"],
   },
 });
 // server/index.js
@@ -43,7 +44,6 @@ app.use(cors());
 //     console.log("Server is running on port 3001");
 //   });
 // }
-
 
 // export default {app, io};
 
@@ -171,8 +171,6 @@ app.post("/getPrivateMessages", verifyJWT, async (req, res) => {
   const userId = req.user.id; // Authenticated user's ID
   const { contactId } = req.body; // Contact ID
 
-  console.log("Fetching messages for:", { userId, contactId });
-
   try {
     // Validate IDs
     if (
@@ -189,8 +187,6 @@ app.post("/getPrivateMessages", verifyJWT, async (req, res) => {
         { sender: contactId, recipient: userId },
       ],
     }).sort({ timestamp: 1 });
-
-    console.log("Fetched messages:", messages);
 
     res.status(200).json({ messages });
   } catch (error) {
@@ -927,48 +923,183 @@ app.post("/getStudentRatings", verifyJWT, async (req, res) => {
   }
 });
 
-app.post("/setCourse", verifyJWT, async (req, res) => {
-  const userId = req.user.id; // Instructor's ID from JWT
-  const { groupId, courseId } = req.body; // Group ID and Course ID from the request
+// Create Course
+app.post("/createCourse", verifyJWT, async (req, res) => {
+  const { courseCode, name } = req.body;
+  const instructorId = req.user.id; // Accessing req.user.id
 
   try {
-      const group = await GroupModel.findById(groupId);
-
-      if (!group) {
-          return res.status(404).json({ message: "Group not found" });
-      }
-
-      if (group.instructor.toString() !== userId) {
-          return res
-              .status(403)
-              .json({ message: "Only the instructor can update the course" });
-      }
-
-      group.course = courseId; // Overwrites the existing course
-      await group.save();
-
-      res.status(200).json({ message: "Course added successfully", group });
+    const course = new CourseModel({
+      courseCode,
+      name,
+      instructor: instructorId,
+    });
+    await course.save();
+    res.status(200).json({ message: "Course created successfully", course });
   } catch (error) {
-      console.error("Error in /setCourse:", error);
-      res.status(500).json({ message: "Server error" });
+    console.error("Error creating course:", error); // Add logging for debugging
+    res.status(500).json({ message: "Error creating course", error });
   }
 });
 
-app.post("/getCourse", verifyJWT, async (req, res) => {
-  const { groupId } = req.body; // Group ID from the request
+// Get Courses
+app.get("/getCourses", verifyJWT, async (req, res) => {
+  const instructorId = req.user.id;
 
   try {
-    // Find the group by ID and populate the course details if it references another model
-    const group = await GroupModel.findById(groupId).populate("course");
+    const courses = await CourseModel.find({
+      instructor: instructorId,
+    }).populate({
+      path: "groups",
+      model: "Group",
+    });
+    res.status(200).json({ courses });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching courses", error });
+  }
+});
 
-    if (!group) {
-      return res.status(404).json({ message: "Group not found" });
+// Add Group to Course
+app.post("/addGroupToCourse", verifyJWT, async (req, res) => {
+  let { courseId, groupId } = req.body;
+
+  try {
+    // Validate ObjectId formats
+    if (
+      !mongoose.Types.ObjectId.isValid(courseId) ||
+      !mongoose.Types.ObjectId.isValid(groupId)
+    ) {
+      return res.status(400).json({ message: "Invalid courseId or groupId" });
     }
 
-    res.status(200).json({ course: group.course });
+    // Convert courseId and groupId to ObjectId using 'new'
+    courseId = new mongoose.Types.ObjectId(courseId);
+    groupId = new mongoose.Types.ObjectId(groupId);
+
+    const course = await CourseModel.findById(courseId);
+    if (!course) {
+      console.error("Course not found:", courseId);
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Check if group already exists in the course
+    if (!course.groups.some((id) => id.equals(groupId))) {
+      course.groups.push(groupId);
+      await course.save();
+      res.status(200).json({ message: "Group added to course successfully" });
+    } else {
+      console.warn(`Group ${groupId} is already in course ${courseId}`);
+      res.status(400).json({ message: "Group already in course" });
+    }
   } catch (error) {
-    console.error("Error in /getCourse:", error);
-    res.status(500).json({ message: "Server error" });
+    console.error("Error in /addGroupToCourse:", error);
+    res
+      .status(500)
+      .json({ message: "Error updating course", error: error.message });
+  }
+});
+
+// Remove Group from Course
+app.post("/removeGroupFromCourse", verifyJWT, async (req, res) => {
+  let { courseId, groupId } = req.body;
+
+  try {
+    // Validate ObjectId formats
+    if (
+      !mongoose.Types.ObjectId.isValid(courseId) ||
+      !mongoose.Types.ObjectId.isValid(groupId)
+    ) {
+      return res.status(400).json({ message: "Invalid courseId or groupId" });
+    }
+
+    // Convert courseId and groupId to ObjectId using 'new'
+    courseId = new mongoose.Types.ObjectId(courseId);
+    groupId = new mongoose.Types.ObjectId(groupId);
+
+    const course = await CourseModel.findById(courseId);
+    if (!course) {
+      console.error("Course not found:", courseId);
+      return res.status(404).json({ message: "Course not found" });
+    }
+
+    // Remove the group from the course's groups array
+    course.groups = course.groups.filter((id) => !id.equals(groupId));
+    await course.save();
+    res.status(200).json({ message: "Group removed from course successfully" });
+  } catch (error) {
+    console.error("Error in /removeGroupFromCourse:", error);
+    res
+      .status(500)
+      .json({ message: "Error updating course", error: error.message });
+  }
+});
+
+// Delete Course
+app.delete("/deleteCourse/:id", verifyJWT, async (req, res) => {
+  const courseId = req.params.id;
+
+  try {
+    await CourseModel.findByIdAndDelete(courseId);
+    res.status(200).json({ message: "Course deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: "Error deleting course", error });
+  }
+});
+
+// Get groups not assigned to any course
+app.get("/getUnassignedGroups", verifyJWT, async (req, res) => {
+  const instructorId = req.user.id;
+
+  try {
+    // Find all groups for the instructor
+    const allGroups = await GroupModel.find({ instructor: instructorId });
+
+    // Find all group IDs assigned to courses
+    const assignedGroupIds = await CourseModel.find({
+      instructor: instructorId,
+    })
+      .select("groups")
+      .then((courses) =>
+        courses.flatMap((course) =>
+          course.groups.map((groupId) => groupId.toString())
+        )
+      );
+
+    // Filter out groups assigned to courses
+    const unassignedGroups = allGroups.filter(
+      (group) => !assignedGroupIds.includes(group._id.toString())
+    );
+
+    res.status(200).json({ groups: unassignedGroups });
+  } catch (error) {
+    console.error("Error in /getUnassignedGroups:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching unassigned groups", error });
+  }
+});
+
+// Update course details
+app.post("/updateCourse", verifyJWT, async (req, res) => {
+  const { courseId, courseCode, name } = req.body;
+  const instructorId = req.userId;
+
+  try {
+    const course = await CourseModel.findOne({
+      _id: courseId,
+      instructor: instructorId,
+    });
+    if (!course) {
+      return res.status(404).json({ message: "Course not found." });
+    }
+
+    course.courseCode = courseCode || course.courseCode;
+    course.name = name || course.name;
+
+    await course.save();
+    res.status(200).json({ message: "Course updated successfully", course });
+  } catch (error) {
+    res.status(500).json({ message: "Error updating course", error });
   }
 });
 
