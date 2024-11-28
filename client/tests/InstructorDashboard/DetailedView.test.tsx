@@ -3,7 +3,7 @@ import { BrowserRouter, MemoryRouter, Route, Routes } from "react-router-dom";
 import DetailedView from "../../src/InstructorDashboard/DetailedView";
 import { describe, it, vi, expect, beforeEach } from "vitest";
 import React from "react";
-import '@testing-library/jest-dom'; // Import jest-dom matchers
+import '@testing-library/jest-dom'; 
 
 const mockResponse = (status: number, data: object) => {
   return Promise.resolve({
@@ -31,7 +31,7 @@ describe("DetailedView Component", () => {
         });
       } else if (url.includes("/getStudentRatings")) {
         return mockResponse(200, {
-          ratings: [], // Adjust based on the test case
+          ratings: [], 
         });
       } else {
         return mockResponse(404, {});
@@ -72,8 +72,8 @@ describe("DetailedView Component", () => {
 
   it("handles fetch errors gracefully", async () => {
     (fetch as vi.Mock)
-      .mockImplementationOnce(() => mockResponse(500, {})) // Group fetch error
-      .mockImplementationOnce(() => mockResponse(500, {})); // Ratings fetch error
+      .mockImplementationOnce(() => mockResponse(500, {})) 
+      .mockImplementationOnce(() => mockResponse(500, {})); 
 
     render(
       <BrowserRouter>

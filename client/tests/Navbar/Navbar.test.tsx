@@ -101,19 +101,15 @@ describe("Navbar Component", () => {
           </BrowserRouter>
         );
       
-        // Locate the mobile menu button
         const mobileMenuButton = document.querySelector(".mobile-menu-icon");
         expect(mobileMenuButton).toBeTruthy();
       
-        // Verify initial state of menu
         const navLinks = document.querySelector(".nav-links");
         expect(navLinks).not.toHaveClass("nav-links-mobile");
       
-        // Click the mobile menu button to open the menu
         fireEvent.click(mobileMenuButton);
         expect(navLinks).toHaveClass("nav-links-mobile");
       
-        // Click again to close the menu
         fireEvent.click(mobileMenuButton);
         expect(navLinks).not.toHaveClass("nav-links-mobile");
       });
@@ -131,14 +127,12 @@ describe("Navbar Component", () => {
           </BrowserRouter>
         );
       
-        // Verify instructor-specific links are rendered
         expect(screen.getByText("Home")).toBeInTheDocument();
         expect(screen.getByText("Summary of Results")).toBeInTheDocument();
       
-        // Verify student-specific links are not rendered
         expect(screen.queryByText("Borrow Book")).not.toBeInTheDocument();
       });
 
-      
+
       
   });
