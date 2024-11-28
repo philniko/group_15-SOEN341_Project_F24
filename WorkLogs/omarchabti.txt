@@ -1,0 +1,24 @@
+Omar Chabti (40262497)
+
+Sprint 1
+-Created the base models for the database schemas
+-Worked on backend for login with Philippe and Kevin
+-Worked on backend for registration with Philippe and Kevin
+-Worked on password hashing with Philippe and Kevin
+
+Sprint 2
+-Assisted a bit with everyone
+-Some minor fixes and code cleaning
+-Worked with Philippe and Kevin on figuring out JWT/authentication
+
+Sprint 3
+-Implemented unit tests for login features
+-Implemented unit tests for registration features
+-Implemented unit tests for group features
+-Automated test running feature on github
+
+Sprint 4
+-Implemented 5 unit tests per server-side user models, group models, rating models, message models
+-Implemented 4 unit tests for server-side course models
+-Implemented 5 unit tests for client-side navbar and the detailed view functionalities each
+-Implemented 4 unit tests for the summary view functionality
