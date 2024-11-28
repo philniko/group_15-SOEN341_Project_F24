@@ -21,8 +21,19 @@ const GroupSchema = new mongoose.Schema({
     ratings: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Ratings'
-    }]
+    }],
 
+    course: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course',
+        required: false
+    },
+
+    messages: [{
+        sender: String,
+        name: String,
+        message: String
+    }]
 })
 
 const Group = mongoose.model('Group', GroupSchema);

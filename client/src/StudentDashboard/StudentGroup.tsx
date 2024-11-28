@@ -1,7 +1,12 @@
 import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Modal, Button } from 'react-bootstrap';
 import { jwtDecode } from 'jwt-decode';
+import GradeChart from './GradeChart';
+import { io } from "socket.io-client";
+
+//chat system
+const socket = io("http://localhost:3002");
 
 // Define a Student interface
 interface Student {
@@ -13,8 +18,8 @@ interface Student {
 }
 
 // Decode the token to get the current user's ID
-const token = localStorage.getItem("token");
-const currentUserId = token ? (jwtDecode(token)).id : null;
+//const token = localStorage.getItem("token");
+//const currentUserId = token ? (jwtDecode(token)).id : null;
 
 function StudentGroup() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -23,6 +28,7 @@ function StudentGroup() {
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [showModal, setShowModal] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [currentUserName, setCurrentUserName] = useState("");
   const [ratings, setRatings] = useState({
     Cooperation: 0,
     ConceptualContribution: 0,
@@ -41,16 +47,61 @@ function StudentGroup() {
   const [conceptualGrade, setConceptualGrade] = useState(-1);
   const [practicalGrade, setPracticalGrade] = useState(-1);
   const [workEthicGrade, setWorkEthicGrade] = useState(-1);
+  const [messages, setMessages] = useState<{sender:string, name:string, message:string}[]>([]);
+  const [message, setMessage] = useState<string>("");
+  const [showChat, setShowChat] = useState(false);
+  const chatInputRef = useRef<HTMLInputElement>(null);
 
   // Update currentUserId whenever the token changes
   useEffect(() => {
     const token = localStorage.getItem("token");
-    const decoded = token ? jwtDecode<{ id: string }>(token) : null;
+    const decoded = token ? jwtDecode<{ id: string, firstName: string, lastName: string}>(token) : null;
     setCurrentUserId(decoded ? decoded.id : null);
+    setCurrentUserName(decoded ? (decoded.firstName + " " + decoded.lastName) : "");
   }, [localStorage.getItem("token")]); // Ensures re-running when token changes
 
   useEffect(() => {
   }, [groupId]);
+
+  function handleMessageSend() {
+    if (message == "") {
+      return;
+    }
+    else if (chatInputRef.current) {
+      chatInputRef.current.value = "";
+      setMessage("");
+    }
+    socket.emit("sendMessage", currentUserId, currentUserName, groupId, message);
+    setMessages([...messages, {sender: currentUserId ? currentUserId : "", name: currentUserName, message: message}]);
+  }
+
+  function fetchMessages() {
+    const getMessages = async () => {
+      const token = localStorage.getItem("token");
+
+      const response = await fetch("http://localhost:3001/getMessages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(token ? {"x-access-token": token} : {})
+        },
+        body: JSON.stringify({ groupId: groupId })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMessages(data);
+      }
+    }
+
+    getMessages();
+  }
+
+  function onKeyDown(e: any) {
+    if (e.key == "Enter") {
+      handleMessageSend();
+    }
+  }
 
   function fetchGrade() {
     const getGrade = async () => {
@@ -60,7 +111,7 @@ function StudentGroup() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": token
+          ...(token ? {"x-access-token": token} : {})
         },
         body: JSON.stringify({ groupId: groupId })
       });
@@ -81,7 +132,29 @@ function StudentGroup() {
 
   useEffect(() => {
     fetchGrade();
+    fetchMessages();
   }, []);
+
+  //chat system
+  useEffect(() => {
+    const teamId = groupId;
+    socket.emit("join-room", teamId);
+    socket.on("receiveMessage", (user, name, message) => {
+      setMessages([...messages, {sender: user, name: name, message: message}]);
+    });
+
+    return () => {
+      socket.emit("leave-room", teamId);
+      socket.off("receiveMessage");
+    }
+  }, [groupId, setMessages]);
+
+  useEffect(() => {
+    if (showChat) {
+      document.addEventListener("keydown", onKeyDown);
+      return () => document.removeEventListener("keydown", onKeyDown);
+    }
+  }, [message, showChat]);
 
   const fetchGroupData = async () => {
     const token = localStorage.getItem('token') || '';
@@ -362,6 +435,44 @@ function StudentGroup() {
           </div>
         }
       </div>
+      <div className="chat-button" onClick={() => setShowChat(true)}>
+        Chat
+      </div>
+      <Modal show={showChat} onHide={() => setShowChat(false)} className="chat-box">
+        <Modal.Header closeButton>
+          <Modal.Title>{groupName}'s Chat</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+        <div>
+          {messages.map((m, i) => 
+            <div key={i}>
+              {m.sender != currentUserId && (i == 0 || (messages[i - 1].sender != messages[i].sender)) && <div className="message-name mt-2 text-start">{m.name}</div>}
+              <div className={"mb-2" + (m.sender == currentUserId ? " text-end" : " text-start")}>
+                <span className={(m.sender == currentUserId ? "own-message" : "other-message")}>{m.message}</span>
+              </div>
+            </div>
+          )}
+        </div>
+        </Modal.Body>
+        <Modal.Footer>
+            <input className="w-75" ref={chatInputRef} onChange={(e: any) => setMessage(e.target.value)} type="text"/>
+            <button onClick={() => handleMessageSend()} className="send-btn">SEND</button>
+        </Modal.Footer>
+      </Modal>
+      {/* Chart Component */}
+      {existGrade && (
+        <div className="grades-chart">
+          <GradeChart
+            grades={{
+              cooperation: cooperationGrade,
+              conceptual: conceptualGrade,
+              practical: practicalGrade,
+              workEthic: workEthicGrade,
+              total: totalGrade
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 }
