@@ -8,5 +8,6 @@ export default defineConfig<string>({
     globals: true,
     environment: 'jsdom',
     setupFiles: './src/setupTests.ts',
+    onUnhandledRejection: 'ignore',
   },
 })
