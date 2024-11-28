@@ -37,7 +37,7 @@ jobs:
       - name: Run Server Tests
         working-directory: server
         run: |
-          npm test --runInBand -- -- watchAll=false 
+          npm test 
            
       # Install and run the server
       - name: Install Server Dependencies
