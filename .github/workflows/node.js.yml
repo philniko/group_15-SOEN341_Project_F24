@@ -10,18 +10,6 @@ jobs:
   run-tests:
     runs-on: windows-latest  
 
-    services:
-      mongodb:
-        image: mongo:5.0
-        ports:
-          - 27017:27017
-        options: >-
-          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'" 
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-
     steps:
       - uses: actions/checkout@v3
 
@@ -30,6 +18,27 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
+          # Install Chocolatey
+      - name: Install Chocolatey
+        shell: powershell
+        run: |
+          Set-ExecutionPolicy Bypass -Scope Process -Force; `
+          [System.Net.ServicePointManager]::SecurityProtocol = `
+          [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; `
+          iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
+
+      # Install MongoDB via Chocolatey
+      - name: Install MongoDB
+        shell: powershell
+        run: |
+          choco install mongodb -y
+
+      # Start MongoDB service
+      - name: Start MongoDB Service
+        shell: powershell
+        run: |
+          net start MongoDB
 
       # Install and run the client
       - name: Install Client Dependencies
@@ -51,14 +60,18 @@ jobs:
         working-directory: server
         run: npm install
 
-      - name: Run Server Tests
-        working-directory: server
-        run: |
-          npm test  
-        
       - name: Start Server in Background
         working-directory: server
         run: |
           npm start &
+
+      - name: Run Server Tests
+        working-directory: server
+        env:
+          MONGODB_URI: mongodb://localhost:27017/testdb
+        run: |
+          npm test  
+        
+
       
       
