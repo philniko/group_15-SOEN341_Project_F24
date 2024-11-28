@@ -36,6 +36,17 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+//for testing
+// if (process.env.NODE_ENV !== "test") {
+//   mongoose.connect("mongodb://localhost:27017/appDB");
+//   app.listen(3001, () => {
+//     console.log("Server is running on port 3001");
+//   });
+// }
+
+
+// export default {app, io};
+
 //connect mongodb
 mongoose.connect("mongodb://localhost:27017/appDB");
 

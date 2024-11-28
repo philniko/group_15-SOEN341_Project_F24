@@ -1,7 +1,24 @@
 Philippe Nikolov (40245641):
 
-SPRINT 3
+SPRINT 1
+- Create structure for codebase
+  - Frontend: Skeleton React app
+  - Backend: express/node and mongoDB database
+- Add "how to run" instructions to README
+- Implement password hashing + login token
+- Fix registering bug
+- Fix server crashing if email exists when signing up bug
 
+SPRINT 2
+- Implement groups and creation of groups for instructor
+- Protect routes
+  - Student can't access instructor routes and vice-versa
+  - Can't access any routes unless logged in
+- Added logout button
+- Fix undefined name in navbar
+- Fix current ratings not being defined in UI
+
+SPRINT 3
 - Implemented Detailed View page:
 - Tweak Summary of Results page
   - Adjust styling
@@ -13,3 +30,10 @@ SPRINT 3
 - Added overall grade to student cards in the "groups" page
 - Fixed bug where students can rate themselves
 - Updated README to be more detailed and add instructions to use
+
+SPRINT 4
+- Implemented private messaging system
+  - Chat menu item in navbar that opens sidebar
+  - Sidebar contains contacts: all users the current user in a group with
+  - Choosing a contact opens the chatbox, where the users can chat live (implemented using socket)
+  - Messages are stored in new "message" database model

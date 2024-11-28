@@ -17,30 +17,36 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
 
       # Install and run the client
       - name: Install Client Dependencies
         working-directory: client
         run: npm install
       
+      - name: Run Client Tests
+        working-directory: client
+        run: |  
+          npm run test -- -- watchAll=false  
+          
       - name: Start Client in Background
         working-directory: client
         run: |
           npm run dev &
-      
-      - name: Run Client Tests
-        working-directory: client
-        run: |
-          npm run test -- -- watchAll=false
 
       # Install and run the server
       - name: Install Server Dependencies
         working-directory: server
         run: npm install
 
+
       - name: Start Server in Background
         working-directory: server
         run: |
           npm start &
+      
+      - name: Run Server Tests
+        working-directory: server
+        run: |
+          npm test  
           
