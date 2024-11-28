@@ -1,0 +1,29 @@
+Charles Partous (40175854):
+
+Sprint 1:
+- Implemented instructor dashboard frontend page
+- Reorganized and documented tasks for all issues from Sprint 1
+- Changed default landing page for app
+- Created repo readme file
+- Wrote Sprint 1 user stories (4)
+
+Sprint 2:
+- Modified instructor dashboard UI structure
+- Added correct dashboard pathing on logging to correct dashboard (Student/Instructor)
+- Created hook to get user info
+- Created dahboard navbar
+- Fixed bug with home button routing
+- Implemented CI
+- Wrote Sprint 2 user stories (2)
+
+Sprint 3:
+- Implemented group name change feature
+- Implemented group removal feature
+- Implemented student removal from group feature
+- Wrote Sprint 2 user stories (3)
+
+Sprint 4:
+- Created course schema 
+- Modified group schema for course feature
+- Implemented backend set and get methods for course feature
+- Wrote Sprint 2 user stories (1)
