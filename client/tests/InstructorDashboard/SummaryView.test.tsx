@@ -62,7 +62,6 @@ describe("SummaryView Component", () => {
 
       expect(screen.getByRole('button', { name: 'Team A' })).toHaveClass('active');
 
-      // Check that student data for Team A is displayed
       expect(screen.getByText("john.doe@example.com")).toBeInTheDocument();
       expect(screen.getByText("John")).toBeInTheDocument();
       expect(screen.getByText("Doe")).toBeInTheDocument();

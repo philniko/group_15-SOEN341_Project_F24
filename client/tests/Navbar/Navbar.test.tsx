@@ -24,18 +24,14 @@ describe("Navbar Component", () => {
           </BrowserRouter>
         );
       
-        // Verify the logo contains the correct name
         const logo = screen.getByText("John Doe");
         expect(logo).toBeInTheDocument();
       
-        // Verify the presence of role-specific links
         expect(screen.getByText("Home")).toBeInTheDocument();
         expect(screen.getByText("Summary of Results")).toBeInTheDocument();
       
-        // Verify the logout button exists
         expect(screen.getByText("Logout")).toBeInTheDocument();
       
-        // Use querySelector for buttons without accessible labels
         const chatButton = document.querySelector(".chat-icon-button");
         expect(chatButton).toBeTruthy();
       });
@@ -71,19 +67,15 @@ describe("Navbar Component", () => {
           </BrowserRouter>
         );
       
-        // Locate the chat button
         const chatButton = document.querySelector(".chat-icon-button");
         expect(chatButton).toBeTruthy();
       
-        // Locate the chat sidebar
         const chatSidebar = document.querySelector(".chat-sidebar");
         expect(chatSidebar).not.toHaveClass("open");
       
-        // Click the chat button to open the sidebar
         fireEvent.click(chatButton);
         expect(chatSidebar).toHaveClass("open");
       
-        // Click again to close the sidebar
         fireEvent.click(chatButton);
         expect(chatSidebar).not.toHaveClass("open");
     });
