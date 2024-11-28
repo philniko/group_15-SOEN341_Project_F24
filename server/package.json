@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "nodemon index.js"
   },
   "keywords": [],
@@ -24,10 +24,13 @@
     "react-chartjs-2": "^5.2.0"
   },
   "devDependencies": {
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
     "@types/node": "^22.5.5",
     "jest": "^29.7.0",
+    "mongodb-memory-server": "^10.1.2",
     "supertest": "^7.0.0"
   },
   "type": "module"
