@@ -33,12 +33,7 @@ jobs:
         working-directory: client
         run: |  
           npm run test -- -- watchAll=false
-
-      - name: Run Server Tests
-        working-directory: server
-        run: |
-          npm test 
-           
+          
       # Install and run the server
       - name: Install Server Dependencies
         working-directory: server
@@ -48,4 +43,9 @@ jobs:
         working-directory: server
         run: |
           npm start &
+      
+      - name: Run Server Tests
+        working-directory: server
+        run: |
+          npm test  
           
