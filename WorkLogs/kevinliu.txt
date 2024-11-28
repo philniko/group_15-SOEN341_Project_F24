@@ -1,0 +1,29 @@
+Kevin Liu (40281197):
+
+SPRINT 1:
+-Implemented the backend for the login and register actions (along with Philippe and Omar)
+-Implemented the user schema (along with Philippe and Omar)
+-Implemented password hashing (along with Philippe and Omar)
+
+SPRINT 2:
+-Implemented the instructor group front-end component
+-Ensured that the instructor is directed to the right dashboard upon login
+-Allowed the instructor to create a new group
+-Allowed the instructor to view all the groups they have created
+-Added error messages (visble to the user) for all input spaces
+-Added acceptance tests
+
+SPRINT 3:
+-Implemented the student grade view
+-Modified the backend to accommodate view student grade requests (added getters)
+-Ensured that the logged in user can only fetch their grades
+-Allowed students to see their overall and individual grades from the group menu (implemented front-end)
+
+SPRINT 4:
+-Implemented the group chat system
+-Allowed students to chat with eachother within the group menu
+-Modified the group schema to be able to store messages in the database
+-Modified the backend to accommodate the fetching and/or addition of messages
+-Ensured that the sender of each message is clearly identifiable
+-Ensured that the messages are sent/received in real-time (the receivers are immediately notified if a new message has been sent)
+-Ensured that the group chats from different groups are independent from eachother

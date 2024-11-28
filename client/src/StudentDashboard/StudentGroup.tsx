@@ -18,8 +18,8 @@ interface Student {
 }
 
 // Decode the token to get the current user's ID
-const token = localStorage.getItem("token");
-const currentUserId = token ? (jwtDecode(token)).id : null;
+//const token = localStorage.getItem("token");
+//const currentUserId = token ? (jwtDecode(token)).id : null;
 
 function StudentGroup() {
   const { groupId } = useParams<{ groupId: string }>();
@@ -83,7 +83,7 @@ function StudentGroup() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": token
+          ...(token ? {"x-access-token": token} : {})
         },
         body: JSON.stringify({ groupId: groupId })
       });
@@ -111,7 +111,7 @@ function StudentGroup() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "x-access-token": token
+          ...(token ? {"x-access-token": token} : {})
         },
         body: JSON.stringify({ groupId: groupId })
       });
@@ -438,7 +438,7 @@ function StudentGroup() {
       <div className="chat-button" onClick={() => setShowChat(true)}>
         Chat
       </div>
-      <Modal show={showChat} onHide={() => setShowChat(false)}>
+      <Modal show={showChat} onHide={() => setShowChat(false)} className="chat-box">
         <Modal.Header closeButton>
           <Modal.Title>{groupName}'s Chat</Modal.Title>
         </Modal.Header>
@@ -456,7 +456,7 @@ function StudentGroup() {
         </Modal.Body>
         <Modal.Footer>
             <input className="w-75" ref={chatInputRef} onChange={(e: any) => setMessage(e.target.value)} type="text"/>
-            <button onClick={() => handleMessageSend()}>SEND</button>
+            <button onClick={() => handleMessageSend()} className="send-btn">SEND</button>
         </Modal.Footer>
       </Modal>
       {/* Chart Component */}
