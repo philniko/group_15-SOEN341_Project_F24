@@ -4,7 +4,8 @@ import User from '../../models/User';
 import Group from '../../models/Group';
 
 beforeAll(async () => {
-    await mongoose.connect('mongodb://127.0.0.1:27017/testdb');
+    const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/testdb'
+    await mongoose.connect(mongoURI);
 });
 
 beforeEach(async () => {

@@ -5,7 +5,8 @@
     import Course from '../../models/Course';
 
     beforeAll(async () => {
-        await mongoose.connect('mongodb://127.0.0.1:27017/testdb');
+        const mongoURI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/testdb'
+        await mongoose.connect(mongoURI);
     });
     
     beforeEach(async () => {

@@ -10,6 +10,18 @@ jobs:
   run-tests:
     runs-on: windows-latest  
 
+    services:
+      mongodb:
+        image: mongo:5.0
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.adminCommand(\"ping\")'" 
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+
     steps:
       - uses: actions/checkout@v3
 
@@ -24,28 +36,29 @@ jobs:
         working-directory: client
         run: npm install
       
+      - name: Run Client Tests
+        working-directory: client
+        run: |  
+          npm run test -- -- watchAll=false  
+          
       - name: Start Client in Background
         working-directory: client
         run: |
           npm run dev &
-      
-      - name: Run Client Tests
-        working-directory: client
-        run: |  
-          npm run test -- -- watchAll=false
-          
+
       # Install and run the server
       - name: Install Server Dependencies
         working-directory: server
         run: npm install
 
+      - name: Run Server Tests
+        working-directory: server
+        run: |
+          npm test  
+        
       - name: Start Server in Background
         working-directory: server
         run: |
           npm start &
       
-      - name: Run Server Tests
-        working-directory: server
-        run: |
-          npm test  
-          
+      
