@@ -775,70 +775,124 @@ app.post("/getRating", verifyJWT, async (req, res) => {
 
 app.get("/getSummaryView", verifyJWT, async (req, res) => {
   try {
-    const instructorId = req.user.id; // Get the instructor's ID from the token
+    const instructorId = req.user.id;
 
-    const groups = await GroupModel.find({ instructor: instructorId })
-      .populate({
-        path: "students",
-        select: "email firstName lastName", // Get basic student info
-      })
-      .populate({
-        path: "ratings",
-        populate: { path: "ratee", select: "_id" }, // Populate ratee for rating calculations
-      });
-
-    const studentSummaries = groups.flatMap((group) => {
-      return group.students.map((student) => {
-        // ... (rest of your existing code)
-        // Filter ratings where this student is the ratee
-        const studentRatings = group.ratings.filter((rating) =>
-          rating.ratee.equals(student._id)
-        );
-
-        // Calculate averages and peer count
-        const avgCooperation = studentRatings.length
-          ? studentRatings.reduce((acc, r) => acc + r.CooperationRating, 0) /
-            studentRatings.length
-          : 0;
-        const avgConceptualContribution = studentRatings.length
-          ? studentRatings.reduce(
-              (acc, r) => acc + r.ConceptualContributionRating,
-              0
-            ) / studentRatings.length
-          : 0;
-        const avgPracticalContribution = studentRatings.length
-          ? studentRatings.reduce(
-              (acc, r) => acc + r.PracticalContributionRating,
-              0
-            ) / studentRatings.length
-          : 0;
-        const avgWorkEthic = studentRatings.length
-          ? studentRatings.reduce((acc, r) => acc + r.WorkEthicRating, 0) /
-            studentRatings.length
-          : 0;
-        const overallAverage =
-          (avgCooperation +
-            avgConceptualContribution +
-            avgPracticalContribution +
-            avgWorkEthic) /
-          4;
-        const peersResponded = studentRatings.length;
-
-        return {
-          email: student.email,
-          firstName: student.firstName,
-          lastName: student.lastName,
-          team: group.name,
-          teamId: group._id,
-          avgCooperation: avgCooperation,
-          avgConceptualContribution: avgConceptualContribution,
-          avgPracticalContribution: avgPracticalContribution,
-          avgWorkEthic: avgWorkEthic,
-          overallAverage: overallAverage,
-          peersResponded: peersResponded,
-        };
-      });
+    const courses = await CourseModel.find({
+      instructor: instructorId,
+    }).populate({
+      path: "groups",
+      model: "Group",
+      populate: [
+        {
+          path: "students",
+          select: "email firstName lastName",
+        },
+        {
+          path: "ratings",
+          populate: { path: "ratee", select: "_id" },
+        },
+      ],
     });
+
+    console.log("Courses fetched:", courses.length);
+    console.log("Courses data:", courses);
+
+    const studentSummaries = [];
+
+    for (const course of courses) {
+      if (!course.groups || course.groups.length === 0) {
+        // Include courses without groups
+        studentSummaries.push({
+          courseName: course.name,
+          courseId: course._id.toString(),
+          team: null,
+          teamId: null,
+          email: null,
+          firstName: null,
+          lastName: null,
+          avgCooperation: null,
+          avgConceptualContribution: null,
+          avgPracticalContribution: null,
+          avgWorkEthic: null,
+          overallAverage: null,
+          peersResponded: null,
+        });
+        continue;
+      }
+
+      for (const group of course.groups) {
+        if (!group.students || group.students.length === 0) {
+          // Include groups without students
+          studentSummaries.push({
+            courseName: course.name,
+            courseId: course._id.toString(),
+            team: group.name,
+            teamId: group._id.toString(),
+            email: null,
+            firstName: null,
+            lastName: null,
+            avgCooperation: null,
+            avgConceptualContribution: null,
+            avgPracticalContribution: null,
+            avgWorkEthic: null,
+            overallAverage: null,
+            peersResponded: null,
+          });
+          continue;
+        }
+        for (const student of group.students) {
+          // Filter ratings where this student is the ratee
+          const studentRatings = group.ratings.filter((rating) =>
+            rating.ratee.equals(student._id)
+          );
+
+          // Calculate averages and peer count
+          const avgCooperation = studentRatings.length
+            ? studentRatings.reduce((acc, r) => acc + r.CooperationRating, 0) /
+              studentRatings.length
+            : 0;
+          const avgConceptualContribution = studentRatings.length
+            ? studentRatings.reduce(
+                (acc, r) => acc + r.ConceptualContributionRating,
+                0
+              ) / studentRatings.length
+            : 0;
+          const avgPracticalContribution = studentRatings.length
+            ? studentRatings.reduce(
+                (acc, r) => acc + r.PracticalContributionRating,
+                0
+              ) / studentRatings.length
+            : 0;
+          const avgWorkEthic = studentRatings.length
+            ? studentRatings.reduce((acc, r) => acc + r.WorkEthicRating, 0) /
+              studentRatings.length
+            : 0;
+          const overallAverage =
+            (avgCooperation +
+              avgConceptualContribution +
+              avgPracticalContribution +
+              avgWorkEthic) /
+            4;
+          const peersResponded = studentRatings.length;
+
+          studentSummaries.push({
+            email: student.email,
+            firstName: student.firstName,
+            lastName: student.lastName,
+            courseName: course.name,
+            courseId: course._id.toString(),
+            team: group.name,
+            teamId: group._id.toString(),
+            avgCooperation: avgCooperation,
+            avgConceptualContribution: avgConceptualContribution,
+            avgPracticalContribution: avgPracticalContribution,
+            avgWorkEthic: avgWorkEthic,
+            overallAverage: overallAverage,
+            peersResponded: peersResponded,
+          });
+        }
+      }
+    }
 
     res.status(200).json(studentSummaries);
   } catch (error) {

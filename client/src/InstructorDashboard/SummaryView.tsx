@@ -1,10 +1,14 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from "react";
+import CourseSummaryView from "./CourseSummaryView";
+import "./SummaryView.css"; // Import the CSS file
 
 // Define the structure for each student's data
-interface StudentData {
+export interface StudentData {
   email: string;
   firstName: string;
   lastName: string;
+  courseName: string;
+  courseId: string;
   team: string;
   teamId: string;
   avgCooperation: number;
@@ -15,129 +19,106 @@ interface StudentData {
   peersResponded: number;
 }
 
-// Define the structure for sorting configuration
-interface SortConfig {
-  key: keyof StudentData | 'lastName';
-  direction: 'ascending' | 'descending';
-}
-
 function SummaryView() {
   const [studentsData, setStudentsData] = useState<StudentData[]>([]);
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'lastName', direction: 'ascending' });
-  const [selectedTeam, setSelectedTeam] = useState<string | null>(null);
+  const [expandedCourses, setExpandedCourses] = useState<{
+    [courseId: string]: boolean;
+  }>({});
 
   useEffect(() => {
     async function fetchData() {
-      const token = localStorage.getItem('token') || "";
-      const response = await fetch('http://localhost:3001/getSummaryView', {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          "x-access-token": token
-        },
-      });
-      const data = await response.json();
-      setStudentsData(data);
-      if (data.length > 0) setSelectedTeam(data[0].team); // Set the initial team tab to the first team
+      const token = localStorage.getItem("token") || "";
+      try {
+        const response = await fetch("http://localhost:3001/getSummaryView", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "x-access-token": token,
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setStudentsData(data);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      }
     }
 
     fetchData();
   }, []);
 
-  // Handle sorting key and direction change
-  const handleSortKeyChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortConfig({ ...sortConfig, key: e.target.value as keyof StudentData });
+  console.log("studentsData", studentsData);
+
+  // Group students by course
+  const coursesData = useMemo(() => {
+    const coursesMap: {
+      [courseId: string]: { courseName: string; students: StudentData[] };
+    } = {};
+    studentsData.forEach((student) => {
+      // Only include students with valid email and firstName
+      if (student.email && student.firstName && student.lastName) {
+        const courseId = student.courseId;
+        if (!coursesMap[courseId]) {
+          coursesMap[courseId] = {
+            courseName: student.courseName,
+            students: [],
+          };
+        }
+        coursesMap[courseId].students.push(student);
+      }
+    });
+    return coursesMap;
+  }, [studentsData]);
+
+  // Function to toggle course expansion
+  const toggleCourseExpansion = (courseId: string) => {
+    setExpandedCourses((prevState) => ({
+      ...prevState,
+      [courseId]: !prevState[courseId],
+    }));
   };
 
-  const handleSortDirectionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSortConfig({ ...sortConfig, direction: e.target.value as 'ascending' | 'descending' });
-  };
-
-  // Sort students based on the current sort configuration
-  const sortedStudents = [...studentsData].sort((a, b) => {
-    if (a[sortConfig.key] < b[sortConfig.key]) {
-      return sortConfig.direction === 'ascending' ? -1 : 1;
+  // Initialize expandedCourses to expand all courses by default
+  useEffect(() => {
+    const initialExpandedCourses: { [courseId: string]: boolean } = {};
+    for (const courseId in coursesData) {
+      initialExpandedCourses[courseId] = false; // Set to false to collapse all courses by default
     }
-    if (a[sortConfig.key] > b[sortConfig.key]) {
-      return sortConfig.direction === 'ascending' ? 1 : -1;
-    }
-    return 0;
-  });
-
-  // Get unique teams
-  const uniqueTeams = Array.from(new Set(studentsData.map(student => student.team)));
-
-  // Filter students by the selected team
-  const filteredStudents = sortedStudents.filter(student => student.team === selectedTeam);
+    setExpandedCourses(initialExpandedCourses);
+  }, [coursesData]);
 
   return (
     <div className="sum">
       <div className="container-sum">
-        {/* Tabs for each team */}
-        {/* Tabs for each team */}
-        <div className="tab-container">
-          {uniqueTeams.map(team => (
-            <button
-              key={team}
-              onClick={() => setSelectedTeam(team)}
-              className={`tab-button ${selectedTeam === team ? 'active' : ''}`}
+        {Object.entries(coursesData).map(([courseId, course]) => (
+          <div key={courseId} className="course-section">
+            {/* Collapsible header */}
+            <div
+              className="course-header"
+              onClick={() => toggleCourseExpansion(courseId)}
             >
-              {team}
-            </button>
-          ))}
-        </div>
-
-        {/* Sorting dropdowns */}
-        <div className="sort-controls">
-          <label>Sort by: </label>
-          <select onChange={handleSortKeyChange} value={sortConfig.key}>
-            <option value="lastName">Last Name</option>
-            <option value="firstName">First Name</option>
-            <option value="team">Team</option>
-            <option value="avgCooperation">Cooperation</option>
-            <option value="avgConceptualContribution">Conceptual Contribution</option>
-            <option value="avgPracticalContribution">Practical Contribution</option>
-            <option value="avgWorkEthic">Work Ethic</option>
-            <option value="overallAverage">Average</option>
-            <option value="peersResponded">Peers who responded</option>
-          </select>
-
-          <label>Order: </label>
-          <select onChange={handleSortDirectionChange} value={sortConfig.direction}>
-            <option value="ascending">Ascending</option>
-            <option value="descending">Descending</option>
-          </select>
-        </div>
-
-        {/* Table for the selected team */}
-        <table>
-          <thead>
-            <tr>
-              {['Student Email', 'First Name', 'Last Name', 'Team', 'Cooperation', 'Conceptual Contribution', 'Practical Contribution', 'Work Ethic', 'Average', 'Peers who responded'].map((col) => (
-                <th key={col}>{col}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {filteredStudents.map((student, index) => (
-              <tr key={`${student.email}-${student.teamId}-${index}`}>
-                <td>{student.email}</td>
-                <td>{student.firstName}</td>
-                <td>{student.lastName}</td>
-                <td>{student.team}</td>
-                <td>{student.avgCooperation.toFixed(2)}</td>
-                <td>{student.avgConceptualContribution.toFixed(2)}</td>
-                <td>{student.avgPracticalContribution.toFixed(2)}</td>
-                <td>{student.avgWorkEthic.toFixed(2)}</td>
-                <td>{student.overallAverage.toFixed(2)}</td>
-                <td>{student.peersResponded}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+              {course.courseName}
+              <span>{expandedCourses[courseId] ? "-" : "+"}</span>
+            </div>
+            {/* If course is expanded, show the content */}
+            {expandedCourses[courseId] && (
+              <div className="course-content">
+                {course.students.length > 0 ? (
+                  <CourseSummaryView students={course.students} />
+                ) : (
+                  <div>No students available for this course.</div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
-};
+}
 
 export default SummaryView;
