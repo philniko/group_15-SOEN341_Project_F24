@@ -50,11 +50,6 @@ jobs:
         working-directory: client
         run: npm install
       
-      - name: Run Client Tests
-        working-directory: client
-        run: |  
-          npm run test -- -- watchAll=false  
-          
       - name: Start Client in Background
         working-directory: client
         run: |
@@ -69,7 +64,11 @@ jobs:
         working-directory: server
         run: |
           npm start &
-
+      - name: Run Client Tests
+        working-directory: client
+        run: |  
+            npm run test -- -- watchAll=false  
+            
       - name: Run Server Tests
         working-directory: server
         env:
